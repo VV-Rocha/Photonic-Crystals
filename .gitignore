@@ -1,0 +1,14 @@
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Data files (do not include HDF5 files)
+*.h5
+*.hdf5
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Byte-compiled / optimized / DLL files
+__pycache__/

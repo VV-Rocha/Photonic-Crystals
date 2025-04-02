@@ -4,6 +4,8 @@ from functools import wraps
 
 from typing import Tuple
 
+# % TODO: Add a method to initialize the classes from a previously stored configuration file.
+
 class Beam:
     """Beam class holding fundamental beam properties."""
     def __init__(self,
@@ -33,11 +35,11 @@ class TwoBeams:
             cs (Tuple[float, float]): Tuple with the coupling with the medium for each beam.
             store_config (StoreConfig, optional): Class object from control.storage_config. Defaults to None.
         """
-        self._beam = Beam2D(wavelengths[0],
+        self._beam = Beam(wavelengths[0],
                              cs[0],
                              )
-        self._beam1 = Beam2D(wavelengths[1],
-                             c[1],
+        self._beam1 = Beam(wavelengths[1],
+                             cs[1],
                              )
         
         if store_config is not None:
@@ -46,19 +48,12 @@ class TwoBeams:
     def store_beams(self, store_config):
         filename = store_config.get_beam_dir()
         with h5py.File(filename, "w") as f:
-            f.create_dataset("wavelenght", data=self.wavelength)
-            f.create_dataset("wavelenght1", data=self.wavelength1)
-            f.create_dataset("c", data=self.c)
-            f.create_dataset("c1", data=self.c1)
-        f.close()
-    
-    def load_beams(self,):
-        filename = store_config.get_beam_dir()
-        with h5py.File(filename, "r") as f:
-            self.wavelength = f["wavelength"]
-            self.wavelength1 = f["wavelength1"]
-            self.c = f["c"]
-            self.c1 = f["c1"]
+            f.create_dataset("wavelenghts",
+                             data = (self.wavelength, self.wavelength1),
+                             )
+            f.create_dataset("cs",
+                             data = (self.c, self.c1),
+                             )
         f.close()
         
     @property

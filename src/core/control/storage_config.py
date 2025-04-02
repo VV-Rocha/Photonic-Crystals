@@ -15,8 +15,8 @@ def validate_workspace(func):
         
         self = bound_args.arguments["self"]
         directory = bound_args.arguments["directory"]
-        if hasattr(self, "workspace"):
-            directory = self.workspace + directory
+        if hasattr(self, "home"):
+            directory = self.home + directory
         
         if not os.path.exists(directory):
             os.makedirs(directory)

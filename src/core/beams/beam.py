@@ -21,7 +21,7 @@ class Beam:
         self.wavelength = wavelength
         self.c = c
 
-class TwoBeams:
+class TwoBeams(Beam):
     """Two beam class for holding fundamental beam properties."""
     def __init__(self,
                  wavelengths: Tuple[float, float],
@@ -35,12 +35,12 @@ class TwoBeams:
             cs (Tuple[float, float]): Tuple with the coupling with the medium for each beam.
             store_config (StoreConfig, optional): Class object from control.storage_config. Defaults to None.
         """
-        self._beam = Beam(wavelengths[0],
-                             cs[0],
-                             )
-        self._beam1 = Beam(wavelengths[1],
-                             cs[1],
-                             )
+        super().__init__(wavelength = wavelengths[0],
+                         c = cs[0],
+                         )
+
+        self.wavelength1 = wavelengths[1]
+        self.c1 = cs[1]
         
         if store_config is not None:
             self.store_beams(store_config)
@@ -55,35 +55,3 @@ class TwoBeams:
                              data = (self.c, self.c1),
                              )
         f.close()
-        
-    @property
-    def wavelength(self,):
-        return self._beam.wavelength
-    
-    @wavelength.setter
-    def wavelength(self, new_wavelength):
-        self._beam.wavelength = new_wavelength
-        
-    @property
-    def c(self,):
-        return self._beam.c
-    
-    @c.setter
-    def c(self, new_c):
-        self._beam.c = new_c
-        
-    @property
-    def wavelength1(self,):
-        return self._beam1.wavelength
-    
-    @wavelength1.setter
-    def wavelength1(self, new_wavelength):
-        self._beam1.wavelength = new_wavelength
-        
-    @property
-    def c1(self,):
-        return self._beam1.c
-    
-    @c1.setter
-    def c1(self, new_c1):
-        self._beam1.c = new_c1

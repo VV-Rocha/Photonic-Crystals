@@ -55,7 +55,8 @@ class PrecisionControl:
             from numpy import float32, complex64
             self.np_float = float32
             self.np_complex = complex64
-            
+
+
 class AfPrecisionControl(PrecisionControl):
     """Holds predefined precision values for the simulation and data storage and analysis.
     The precision values are stored in a file and can be loaded or saved as needed."""
@@ -76,6 +77,7 @@ class AfPrecisionControl(PrecisionControl):
         self.init_af_dtypes()
         
     def init_af_dtypes(self):
+        """Initializes the arrayfire numerical types based on the required precision."""
         import arrayfire as af
         if self.precision == "double":
             self.af_float = af.Dtype.f64

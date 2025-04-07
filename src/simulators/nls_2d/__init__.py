@@ -1,1 +1,3 @@
-from .coupled_eqs import *
+__all__ = ['coupled_eqs']
+
+from . import coupled_eqs

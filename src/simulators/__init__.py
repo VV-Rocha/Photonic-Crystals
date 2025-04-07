@@ -1,3 +1,3 @@
-from .input_fields import *
+__all__ = ['nls_2d']
 
-from .nls_2d import *
+from . import nls_2d

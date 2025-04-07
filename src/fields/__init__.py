@@ -6,6 +6,8 @@ __all__ = ['Field2D',
            'GaussianBeamConfig',
            'LatticeGaussianBeamConfig',
            'LatticeGaussianCoupledConfig',
+           'landscapes',
+           'backgrounds',
            ]
 
 from .field import Field2D
@@ -14,3 +16,6 @@ from .field import AfCoupled2D
 from .field import NotebookAfCoupledSimulation2D
 
 from .lattices_gaussian_properties import LatticeConfig, GaussianBeamConfig, LatticeGaussianBeamConfig, LatticeGaussianCoupledConfig
+
+from . import landscapes
+from . import backgrounds

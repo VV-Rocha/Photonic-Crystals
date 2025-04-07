@@ -35,9 +35,9 @@ class AdimensionalBox(Box):
             self.lx = adim_method.adimensionalize_length(self.lx)
             self.ly = adim_method.adimensionalize_length(self.ly)
             self.lz = adim_method.adimensionalize_time(self.lz)
-            self.dim_flag = "dimensional"
-        except AttributeError as e:
             self.dim_flag = "adimensional"
+        except AttributeError as e:
+            self.dim_flag = "dimensional"
             if adim_method is None:
                 print("Adimensional method not defined. Currently working with dimensional box.")
             else:
@@ -101,3 +101,50 @@ class Mesh2D(AdimensionalBox):
         self.kz = 2*pi*(fftfreq(self.Nz, self.dz))
         
         self.kXX, self.kYY = meshgrid(self.kx, self.ky)
+        
+# % TODO: Change this method to be initialized as the previous ones and add alternative initialization to accept the method currently used. 
+class AfMesh2D():
+    """Class to create a 2D mesh for the position representation of functions using ArrayFire."""
+    def __init__(self, mesh, precision_control):        
+        self.mesh = mesh
+        
+        self.af_complex = precision_control.af_complex
+        
+        self.init_mesh()
+        
+    def init_mesh(self):
+        self.x = af.constant(1., *self.mesh.x.shape, dtype=self.af_complex)
+        self.x *= af.interop.from_ndarray(self.mesh.x)
+        
+        self.y = af.constant(1., *self.mesh.y.shape, dtype=self.af_complex)
+        self.y *= af.interop.from_ndarray(self.mesh.y)
+        
+        self.z = af.constant(1., *self.mesh.z.shape, dtype=self.af_complex)
+        self.z *= af.interop.from_ndarray(self.mesh.z)
+    
+        self.XX = af.constant(1., *self.mesh.XX.shape, dtype=self.af_complex)
+        self.XX *= af.interop.from_ndarray(self.mesh.XX)
+
+        self.YY = af.constant(1., *self.mesh.YY.shape, dtype=self.af_complex)
+        self.YY *= af.interop.from_ndarray(self.mesh.YY)
+    
+    def init_k_mesh(self):
+        try:
+            self.kx = af.constant(1., *self.mesh.kx.shape, dtype=self.af_complex)
+            self.kx *= af.interop.from_ndarray(self.mesh.kx)
+            
+            self.ky = af.constant(1., *self.mesh.ky.shape, dtype=self.af_complex)
+            self.ky *= af.interop.from_ndarray(self.mesh.ky)
+            
+            self.kz = af.constant(1., *self.mesh.kz.shape, dtype=self.af_complex)
+            self.kz *= af.interop.from_ndarray(self.mesh.kz)
+            
+            self.kXX = af.constant(1., *self.mesh.kXX.shape, dtype=self.af_complex)
+            self.kXX *= af.interop.from_ndarray(self.mesh.kXX)
+            
+            self.kYY = af.constant(1., *self.mesh.kYY.shape, dtype=self.af_complex)
+            self.kYY *= af.interop.from_ndarray(self.mesh.kYY)
+        except:
+            self.mesh.init_k_mesh()
+            
+            self.init_k_mesh()

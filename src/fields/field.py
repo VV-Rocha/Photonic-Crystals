@@ -33,7 +33,7 @@ class StoreField:
                  ):
         self.storage_config = storage_config
 
-    def store_field(self, filename: str, field: ndarray=None):
+    def store_field(self, field: ndarray=None, filename: str = ""):
         """Store the field in hdf5 format. The field is stored in the dataset "field" and the extent in the dataset "extent".
 
         Args:
@@ -65,6 +65,9 @@ def cache_import_Field2D(init_func):
         if not hasattr(Field2D, "_array"):
             from numpy import array
             Field2D._array = array
+        if not hasattr(Field2D, "_copy"):
+            from numpy import copy
+            Field2D._copy = copy
         return init_func(*args, **kwargs)
     return wrapper
 
@@ -129,21 +132,27 @@ class Field2D(StoreField):
         """Decorator to check if the given field is None. If it is, the function uses the field attribute of the class. This is used to avoid having to pass the field as an argument every time.
         """
         @wraps(func)
-        def wrapper(self, filename, field):
+        def wrapper(self, field=None, *args, **kwargs):
             if field is None:
-                return func(self, filename, self.field)
-            return func(self, filename, field)
+                return func(self, self.field, *args, **kwargs)
+            return func(self, field, *args, **kwargs)
         return wrapper
 
     @check_field
-    def store_field(self, filename:str, field=None):
+    def copy_input_field(self,
+                         field: ndarray | None = None,
+                         ):
+        self.input_field = self.__class__._copy(field)
+
+    @check_field
+    def store_field(self, field=None, filename:str = ""):
         """Store the field in hdf5 format. The field is stored in the dataset "field" and the extent in the dataset "extent".
 
         Args:
             filename (str): Directory of the file to store the field.
             field (ndarray, optional): Field to be stored. Defaults to self.field.
         """
-        super().store_field(filename, field)
+        super().store_field(field, filename)
 
 def cache_import_AfField2D(init_func):
     @wraps(init_func)
@@ -181,7 +190,7 @@ class AfField2D(Field2D):
                          precision_control = precision_control,
                          storage_config = storage_config,
                          )
-        
+    
     def convert_to_afarray(self,):
         """Converts the field to an Arrayfire Array. If the field is already an Arrayfire array, it does nothing."""
         self.field = self.return_afarray()
@@ -204,14 +213,14 @@ class AfField2D(Field2D):
 
     def check_field(func):
         @wraps(func)
-        def wrapper(self, filename, field):
+        def wrapper(self, field=None, *args, **kwargs):
             if field is None:
-                return func(self, filename, self.field)
-            return func(self, filename, field)
+                return func(self, self.field, *args, **kwargs)
+            return func(self, field, *args, **kwargs)
         return wrapper
 
     @check_field
-    def store_field(self, filename: str, field=None):
+    def store_field(self, field=None, filename: str = ""):
         """Store the field in hdf5 format. The field is stored in the dataset "field" and the extent in the dataset "extent".
         The field and extent are stored as numpy ndarrays.
 
@@ -219,7 +228,7 @@ class AfField2D(Field2D):
             filename (str): Directory of the file to store the field. Defaults to None.
             field (ndarray, optional): Stores field, if field is None stores self.field. Defaults to None.
         """
-        super().store_field(filename, self.return_ndarray())
+        super().store_field(self.return_ndarray(), filename,)
 
 class AfLandscapedField2D(AfField2D):
     """(Arrayfire) 2D field class with landscape. The field is stored in an Arrayfire array. The metadata is stored in the extent attribute."""
@@ -293,13 +302,13 @@ class AfCoupled2D:
         """
         self.store_config = store_config
         
-        self._field = AfLandscapedField2D(simulation_config,
-                                         beam_config=modulation_config.beam,
-                                         precision_control=precision_control,
+        self._field = AfLandscapedField2D(simulation_config = simulation_config,
+                                         beam_config = modulation_config.beam,
+                                         precision_control = precision_control,
                                          )
-        self._field1 = AfLandscapedField2D(simulation_config,
-                                         beam_config=modulation_config.beam1,
-                                         precision_control=precision_control,
+        self._field1 = AfLandscapedField2D(simulation_config = simulation_config,
+                                         beam_config = modulation_config.beam1,
+                                         precision_control = precision_control,
                                          )
         
     def gen_fields(self,
@@ -331,9 +340,21 @@ class AfCoupled2D:
         Args:
             index (str): Index to add to the 'field_{index}' base filename.
         """
-        self._field.store_field(self.store_config.get_field_dir(index), self.field)
-        self._field1.store_field(self.store_config.get_field1_dir(index), self.field1,)
+        self._field.store_field(self.field, self.store_config.get_field_dir(index))
+        self._field1.store_field(self.field1, self.store_config.get_field1_dir(index),)
         # % TODO: Add method to automatically convert index to str and remove conversion in previous lines
+
+    def copy_input_fields(self,):
+        self._field.copy_input_field()
+        self._field1.copy_input_field()
+    
+    @property
+    def input_field(self,):
+        return self._field.input_field
+    
+    @property
+    def input_field1(self,):
+        return self._field1.input_field
 
     @property
     def field(self,):
@@ -352,28 +373,129 @@ class AfCoupled2D:
         return self._field1.extent
 
 
+class Plotting2D:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+    def if_subplot(plotting_function):
+        @wraps(plotting_function)
+        
+        def wrapper(self, ax, *args, **kwargs):
+            if isinstance(ax, self.__class__._Axes):
+                return plotting_function(self, ax, *args, **kwargs)
+            
+            fig = self.__class__._figure()
+            gs = self.__class__._gridspec.GridSpec(nrows = 1,
+                                                ncols = 1,
+                                                figure = fig,
+                                                )
+            ax = fig.add_subplot(gs[0,0])  # % TODO: Do I need to use the [0,0] indices.
+            return plotting_function(self, ax, *args, **kwargs)
+            
+        return wrapper
+
+    @if_subplot
+    def plotting_intensity(self,
+                           ax,
+                           fig,
+                           field,
+                           extent,
+                           scientific_notation_power,
+                           show: bool = False,
+                           get_figax: bool = True,
+                           ):
+        ax.imshow(self.__class__._abs(field)**2,
+                  extent = extent * 10**(-scientific_notation_power),
+                  )
+        if get_figax:
+            return fig, ax
+        
+    @if_subplot
+    def plotting_phase(self,
+                           ax,
+                           fig,
+                           field,
+                           extent,
+                           scientific_notation_power,
+                           show: bool = False,
+                           get_figax: bool = True,
+                           ):
+        ax.imshow(self.__class__._angle(field),
+                  extent = extent * 10**(-scientific_notation_power),
+                  )
+        if get_figax:
+            return fig, ax
+    
+def cache_import_init(init_func):
+    @wraps(init_func)
+    def wrapper(*args, **kwargs):
+        from numpy import linspace, meshgrid
+        Plotting3D._linspace = linspace
+        Plotting3D._meshgrid = meshgrid
+        from matplotlib.pyplot import figure
+        Plotting3D._figure = figure
+        return init_func(*args, **kwargs)
+    return wrapper
+        
+class Plotting3D:
+    # % TODO: Generalize this method for both fields.
+    # % TODO: Controlability through input parameters.
+    @cache_import_init
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def plot_field_3d(self, ax, scientific_notation_power):
+        X, Y = self.__class__._meshgrid(self.__class__._linspace(self.extent[0], self.extent[1], self.field.shape[0]),
+                                       self.__class__._linspace(self.extent[2], self.extent[3], self.field.shape[1]))
+
+        X *= 10**(-scientific_notation_power)
+        Y *= 10**(-scientific_notation_power)
+
+        surf = ax.plot_surface(X,
+                               Y,
+                               self.__class__._abs(self.field)**2,
+                               linewidth=0,
+                               antialiased=False,
+                               cmap="viridis",
+                               alpha=.8
+                               )
+        
+        ax.set_zlim(0, .5)
+        
+        # Label axes
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Intensity')
+        
+        
 def cache_import_CoupledPlotting(init_func):
     @wraps(init_func)
     def wrapper(self, *args, **kwargs):
-        
-        if not hasattr(CoupledPlotting, "_angle"):
-            from numpy import angle
-            CoupledPlotting._angle = angle
-        if not hasattr(CoupledPlotting, "_abs"):
-            from numpy import abs
-            CoupledPlotting._abs = abs
-        if not hasattr(CoupledPlotting, "_subplots"):
-            import matplotlib.pyplot as plt
-            plt.ioff()  # Turn off show
-            CoupledPlotting._subplots = plt.subplots
+        from numpy import angle
+        CoupledPlotting._angle = angle
+        from numpy import abs
+        CoupledPlotting._abs = abs
+        import matplotlib.pyplot as plt
+        plt.ioff()  # Turn off show
+        CoupledPlotting._figure = plt.figure
+        CoupledPlotting._subplots = plt.subplots
+        import matplotlib.gridspec as gridspec
+        CoupledPlotting._gridspec = gridspec
+        from matplotlib.axes import Axes
+        CoupledPlotting._Axes = Axes
         return init_func(self, *args, **kwargs)
     return wrapper
 
-class CoupledPlotting:
+class CoupledPlotting(Plotting2D, Plotting3D):
     """Add plotting functionality."""
     @cache_import_CoupledPlotting
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def axis_labels(self, ax, scientific_notation_power):
+        ax.set_xlabel(fr"$x \left(10^{{{scientific_notation_power}}} m\right)$")
+        ax.set_ylabel(fr"$y \left(10^{{{scientific_notation_power}}} m\right)$")        
+        return ax
 
     def plot_fields(self,
                     scientific_notation_power=-3,
@@ -386,21 +508,115 @@ class CoupledPlotting:
         """
         scientific_notation = 10**scientific_notation_power
 
-        fig, axs = self.__class__._subplots(2, 2)
-        axs[0, 0].imshow(self.__class__._abs(self.field)**2, extent=self.extent)
-        axs[0, 1].imshow(self.__class__._abs(self.field1)**2, extent=self.extent1)
-        axs[1, 0].imshow(self.__class__._angle(self.field), extent=self.extent)
-        axs[1, 1].imshow(self.__class__._angle(self.field1), extent=self.extent1)
-            
-        for ax in axs.flat:
-            ax.set_xlabel(fr"$x \left(10^{{{scientific_notation_power}}} m\right)$")
-            ax.set_ylabel(fr"$y \left(10^{{{scientific_notation_power}}} m\right)$")
+        fig = self.__class__._figure()
+
+        gs = self.__class__._gridspec.GridSpec(nrows = 2,
+                                               ncols = 2,
+                                               figure = fig,
+                                               )
+
+        ax00 = fig.add_subplot(gs[0, 0])
+        ax01 = fig.add_subplot(gs[0, 1])
+        ax10 = fig.add_subplot(gs[1, 0])
+        ax11 = fig.add_subplot(gs[1, 1])
+
+        self.plotting_intensity(ax00,
+                                fig,
+                                self.field,
+                                self.extent,
+                                scientific_notation_power,
+                                show = False,
+                                get_figax = True,
+                                )
+        self.plotting_phase(ax10,
+                            fig,
+                            self.field,
+                            self.extent,
+                            scientific_notation_power,
+                            show = False,
+                            get_figax = True,
+                            )
+        self.plotting_intensity(ax01,
+                                fig,
+                                self.field1,
+                                self.extent1,
+                                scientific_notation_power,
+                                show = False,
+                                get_figax = True,
+                                )
+        self.plotting_phase(ax11,
+                            fig,
+                            self.field1,
+                            self.extent1,
+                            scientific_notation_power,
+                            show = False,
+                            get_figax = True,
+                            )
+        
+        ax00 = self.axis_labels(ax00, scientific_notation_power)
+        ax10 = self.axis_labels(ax10, scientific_notation_power)
+        ax01 = self.axis_labels(ax01, scientific_notation_power)
+        ax11 = self.axis_labels(ax11, scientific_notation_power)
             
         fig.tight_layout()
         
         if show:
             fig.show()
+    
+    def plot_input_output_3d(self, scientific_notation_power=-3, show: bool = True):
+        fig = self.__class__._figure()
         
+        gs = self.__class__._gridspec.GridSpec(nrows = 2,
+                                               ncols = 3,
+                                               figure = fig,
+                                               width_ratios=[1, 1, 1],  # Make the right column (3D plot) twice as wide
+                                               wspace=0.4,           # Horizontal spacing
+                                               hspace=0.3            # Vertical spacing
+                                               )
+        
+        ax_input_intensity = fig.add_subplot(gs[0, 0])
+        ax_output_intensity = fig.add_subplot(gs[1, 0])
+        ax_3d_intensity = fig.add_subplot(gs[:, 1:], projection='3d')
+    
+        ## 2d intensity fields
+        self.plotting_intensity(ax_input_intensity,
+                                fig,
+                                self.input_field,
+                                self.extent,
+                                scientific_notation_power,
+                                show = False,
+                                get_figax = True,
+                                )
+        self.plotting_intensity(ax_output_intensity,
+                                fig,
+                                self.field,
+                                self.extent,
+                                scientific_notation_power,
+                                show = False,
+                                get_figax = True,
+                                )
+        
+        self.plot_field_3d(ax_3d_intensity, scientific_notation_power)
+        
+        ax_input_intensity.set_title("Input Beam")
+        ax_input_intensity.set_xlabel(fr"$x \left(10^{{{scientific_notation_power}}} m\right)$")
+        ax_input_intensity.set_ylabel(fr"$y \left(10^{{{scientific_notation_power}}} m\right)$")    
+        
+        ax_output_intensity.set_title("Output Beam")
+        ax_output_intensity.set_xlabel(fr"$x \left(10^{{{scientific_notation_power}}} m\right)$")
+        ax_output_intensity.set_ylabel(fr"$y \left(10^{{{scientific_notation_power}}} m\right)$")    
+        
+        ax_3d_intensity.set_title("Output 3d Intensity")
+        ax_3d_intensity.set_xlabel(fr"$x \left(10^{{{scientific_notation_power}}} m\right)$")
+        ax_3d_intensity.set_ylabel(fr"$y \left(10^{{{scientific_notation_power}}} m\right)$")    
+        
+        fig.tight_layout()
+        
+        if show:
+            fig.show()
+        
+# % TODO: Change the plotting classes into a new field_plotting.py file.
+
 class NotebookAfCoupledSimulation2D(CoupledPlotting, AfCoupled2D):
     """Joins the AfCoupled2D and CoupledPlotting classes to explore simuation in a notebook."""
     def __init__(self,

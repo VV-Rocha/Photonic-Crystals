@@ -12,9 +12,8 @@ from copy import deepcopy
 def input_fields_to_arrs(func):
     @wraps(func)
     def wrapper(self, input_fields, *args, **kwargs):
-        fields = deepcopy(input_fields)
-        fields.convert_fields_to_afarray()
-        return func(self, fields, *args, **kwargs)
+        input_fields.convert_fields_to_afarray()
+        return func(self, input_fields, *args, **kwargs)
     return wrapper
 
 class CoupledSimulationBox:
@@ -59,8 +58,16 @@ class CoupledSimulationBox:
         
         self.storing_method = storing_method
     
+    def copy_input_fields(solver):
+        @wraps(solver)
+        def wrapper(self, fields, *args, **kwargs):
+            fields.copy_input_fields()
+            return solver(self, fields, *args, **kwargs)
+        return wrapper
+    
+    @copy_input_fields
     @input_fields_to_arrs
-    def solver(self, fields, return_flag=False, store_config=None):
+    def solver(self, fields, store_config=None):
         """Solves the equation using the solver method and the fields provided.
 
         Args:
@@ -82,9 +89,6 @@ class CoupledSimulationBox:
         if (store_config.get_store_type() == "last"):
             fields.store_fields(index = "last",
                                 )
-            
-        if return_flag:
-            return fields
 
     def set_device(self):
         """

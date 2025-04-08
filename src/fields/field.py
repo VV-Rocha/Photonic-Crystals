@@ -364,6 +364,7 @@ def cache_import_CoupledPlotting(init_func):
             CoupledPlotting._abs = abs
         if not hasattr(CoupledPlotting, "_subplots"):
             import matplotlib.pyplot as plt
+            plt.ioff()  # Turn off show
             CoupledPlotting._subplots = plt.subplots
         return init_func(self, *args, **kwargs)
     return wrapper
@@ -376,6 +377,7 @@ class CoupledPlotting:
 
     def plot_fields(self,
                     scientific_notation_power=-3,
+                    show: bool = True,
                     ):
         """2x2 grid of intensity fields (top row) and phase profile (bottom row).
 
@@ -395,6 +397,9 @@ class CoupledPlotting:
             ax.set_ylabel(fr"$y \left(10^{{{scientific_notation_power}}} m\right)$")
             
         fig.tight_layout()
+        
+        if show:
+            fig.show()
         
 class NotebookAfCoupledSimulation2D(CoupledPlotting, AfCoupled2D):
     """Joins the AfCoupled2D and CoupledPlotting classes to explore simuation in a notebook."""

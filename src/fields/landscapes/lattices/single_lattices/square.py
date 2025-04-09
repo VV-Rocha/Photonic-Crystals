@@ -1,4 +1,4 @@
-from numpy import exp, pi, abs, zeros
+from numpy import exp, pi, abs, zeros, max
 
 from functools import wraps
 
@@ -16,6 +16,7 @@ def square_dimensions(func):
 def square_planewaves(mesh,
                       a: float,
                       rotation: float,
+                      norm: bool = True
                       ):
     """Plots the square lattice in the mesh grid using the superposition of planewaves.
 
@@ -23,13 +24,17 @@ def square_planewaves(mesh,
         mesh (_type_): Mesh2D object containing the domain mesh grid.
         a (float): Lattice parameter.
         rotation (float): Rotation angle of the lattice in radians.
-
+        norm (bool): Wether to normalize the lattice between [-1,1]. Default True.
+        
     Returns:
         ndarray: Square lattice over the mesh grid domain.
     """
     XX, YY = mesh.rotate_mesh(rotation)
     
     lattice = 2*(exp(1j*2*pi*XX/a) + exp(-1j*2*pi*XX/a) + exp(1j*2*pi*YY/a) + exp(-1j*2*pi*YY/a))
+    
+    if norm:
+        lattice /= max(abs(lattice))  ## normalize between [-1,1].
     
     return lattice
 

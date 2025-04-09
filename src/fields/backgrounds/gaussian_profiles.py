@@ -26,6 +26,7 @@ def gaussian_25(mesh,
                 w: float | Tuple[float, float],
                 I: float,
                 power: int,
+                norm: str = "density",
                 ):
     """Returns the Gaussian beam profile in 2D.
 
@@ -39,7 +40,11 @@ def gaussian_25(mesh,
         ndarray: Gaussian profile over the mesh grid domain.
     """
     canvas = np.zeros(mesh.XX.shape, dtype=np.complex128)
-    canvas[:,:] = np.exp(-(.25 * ((mesh.XX/w[0])**2 + (mesh.YY/w[1])**2))**power)
+    canvas[:,:] = np.exp(-(((mesh.XX/w[0])**2 + (mesh.YY/w[1])**2))**power)
+    if norm == "density":
+        canvas *= np.sqrt(2/(np.pi*w[0]*w[1])) # Normalize Gaussian
+    elif norm == "max":
+        canvas /= np.max(np.abs(canvas)**2)
     canvas /= np.max(np.abs(canvas)**2)
     canvas *= np.sqrt(I)
     return canvas

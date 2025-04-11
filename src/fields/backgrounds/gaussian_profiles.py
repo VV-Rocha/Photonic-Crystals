@@ -40,7 +40,7 @@ def gaussian_25(mesh,
         ndarray: Gaussian profile over the mesh grid domain.
     """
     canvas = np.zeros(mesh.XX.shape, dtype=np.complex128)
-    canvas[:,:] = np.exp(-(((mesh.XX/w[0])**2 + (mesh.YY/w[1])**2))**power)
+    canvas[:,:] = np.exp(-.5*(((2*mesh.XX/w[0])**2 + (2*mesh.YY/w[1])**2))**power)
     if norm == "density":
         canvas *= np.sqrt(2/(np.pi*w[0]*w[1])) # Normalize Gaussian
     elif norm == "max":

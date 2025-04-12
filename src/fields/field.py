@@ -353,6 +353,10 @@ class AfCoupled2D(AfLandscapedField2D):
     @property
     def input_field1(self,):
         return self._field1.input_field
+    
+    @input_field1.setter
+    def input_field1(self, new_field):
+        self._field1.input_field = new_field
 
     @property
     def field1(self,):

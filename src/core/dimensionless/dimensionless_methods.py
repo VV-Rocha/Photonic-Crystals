@@ -51,6 +51,13 @@ class DimensionlessMethods:
         """
         return time * self.longitudinal_adim_factor
 
+class Dimensional(DimensionlessMethods):
+    def __init__(self,):
+        self.transversal_adim_factor = 1.
+        self.longitudinal_adim_factor = 1.
+        
+        super().__init__()
+
 class WavevectorScale(DimensionlessMethods):
     """Adimensionalization to the wavelength scale in photorefractive crystals."""
     def __init__(self,

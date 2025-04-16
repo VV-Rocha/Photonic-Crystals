@@ -179,6 +179,7 @@ class CoupledPlotting(Plotting2D, Plotting3D):
     def plot_fields(self,
                     scientific_notation_power=-3,
                     show: bool = True,
+                    cmap_intensity = "viridis",
                     ):
         """2x2 grid of intensity fields (top row) and phase profile (bottom row).
 
@@ -205,6 +206,7 @@ class CoupledPlotting(Plotting2D, Plotting3D):
                                 scientific_notation_power,
                                 ax00,
                                 fig,
+                                cmap = cmap_intensity,
                                 )
         self.plotting_phase(self.field,
                             self.extent,
@@ -217,6 +219,7 @@ class CoupledPlotting(Plotting2D, Plotting3D):
                                 scientific_notation_power,
                                 ax01,
                                 fig,
+                                cmap = cmap_intensity,
                                 )
         self.plotting_phase(self.field1,
                             self.extent1,

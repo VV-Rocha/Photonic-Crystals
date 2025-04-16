@@ -74,8 +74,6 @@ class WavevectorScale(DimensionlessMethods):
         """
         w = beam_parameters.wavelength
         n = crystal_parameters.n
-        bias_field = crystal_parameters.tension / crystal_parameters.Lx
-        electro_optic_coef = crystal_parameters.electro_optic_coef
         
         delta_n_max = crystal_parameters.delta_n_max
         k = 2*pi/w

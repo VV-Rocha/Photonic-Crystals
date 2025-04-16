@@ -31,7 +31,7 @@ class PhotorefractiveCoefs:
         alpha = crystal_parameters.alpha
         delta_n_max = crystal_parameters.delta_n_max
             
-        self.kinetic = (1./(k * n)) * adim_method.longitudinal_adim_factor / (2 * adim_method.transversal_adim_factor**2)
+        self.kinetic = adim_method.longitudinal_adim_factor / (2 * k * n * adim_method.transversal_adim_factor**2)
         self.potential = c * k * adim_method.longitudinal_adim_factor * delta_n_max
         self.absorption = alpha * adim_method.longitudinal_adim_factor
         
@@ -46,7 +46,7 @@ class PhotorefractiveCoefs:
         Returns:
             float | ndarray: Nonlinear term of the NLSE in photorefractive crystals.
         """
-        return self.potential*I/(self.Isat + I)
+        return self.potential * I/(self.Isat + I)
     
     def print_coefs(self,):
         """Print Coefficients"""
@@ -81,11 +81,11 @@ class CoupledPhotorefractiveCoefs(PhotorefractiveCoefs):
         k1 = 2*pi/beam_parameters.wavelength1
         c1 = beam_parameters.c1
         
-        self.kinetic1 = (1./(k1 * n1)) * adim_method.longitudinal_adim_factor / (2 * adim_method.transversal_adim_factor**2)
+        self.kinetic1 = adim_method.longitudinal_adim_factor / (2 * k1 * n1 * adim_method.transversal_adim_factor**2)
         self.potential1 = c1 * k1 * adim_method.longitudinal_adim_factor * delta_n_max1
         self.absorption1 = alpha1 * adim_method.longitudinal_adim_factor
         
-        self.Isat = crystal_parameters.Isat
+        # self.Isat = crystal_parameters.Isat
         
         if store_config is not None:
             self.store_coefs(store_config)
@@ -99,7 +99,7 @@ class CoupledPhotorefractiveCoefs(PhotorefractiveCoefs):
         Returns:
             float | ndarray: Nonlinear term of the NLSE in photorefractive crystals.
         """
-        return self.potential1*I/(self.Isat + I)
+        return self.potential1 * I/(self.Isat + I)
         
     def print_coefs(self,):
         """Print Coefficients."""

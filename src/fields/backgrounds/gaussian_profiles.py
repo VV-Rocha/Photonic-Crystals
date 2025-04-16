@@ -26,7 +26,7 @@ def gaussian_25(mesh,
                 w: float | Tuple[float, float],
                 I: float,
                 power: int,
-                norm: str = "density",
+                norm: str | None = None,
                 ):
     """Returns the Gaussian beam profile in 2D.
 
@@ -35,6 +35,7 @@ def gaussian_25(mesh,
         w (float | Tuple[float, float]): FWHM of the gaussian profile.
         I (float): Intensity of the gaussian profile. The magnitude of the field is the square root of the intensity.
         power (int): (super)Gaussian power.
+        norm (str | None): Method for normalizing the Gaussian. Possible values are "density", "max" and None. Leaving the value None results in the normal Gaussian with max value 1. Default None.
 
     Returns:
         ndarray: Gaussian profile over the mesh grid domain.

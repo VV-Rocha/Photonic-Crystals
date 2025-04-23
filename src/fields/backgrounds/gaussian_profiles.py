@@ -6,24 +6,28 @@ from typing import Tuple
 
 def gaussian_25_dimensions(func):
     @wraps(func)
-    def wrapper(mesh, w, I, power):
+    def wrapper(mesh, w, center, I, power):
         if mesh.dim_flag == "adimensional":
             w = (mesh.adim_method.adimensionalize_length(w[0]), mesh.adim_method.adimensionalize_length(w[1]))
-        return func(mesh, w, I, power)
+            center = (mesh.adim_method.adimensionalize_length(center[0]), mesh.adim_method.adimensionalize_length(center[1]))
+        return func(mesh, w, center, I, power)
     return wrapper
 
 def check_width(func):
     @wraps(func)
-    def wrapper(mesh, w, I, power):
+    def wrapper(mesh, w, center, I, power):
         if type(w) is float:
             w = (w, w)
-        return func(mesh, w, I, power)
+        if type(center) is float:
+            center = (center, center)
+        return func(mesh, w, center, I, power)
     return wrapper
 
 @check_width
 @gaussian_25_dimensions
 def gaussian_25(mesh,
                 w: float | Tuple[float, float],
+                center: float | Tuple[float, float],
                 I: float,
                 power: int,
                 norm: str | None = None,
@@ -41,7 +45,8 @@ def gaussian_25(mesh,
         ndarray: Gaussian profile over the mesh grid domain.
     """
     canvas = np.zeros(mesh.XX.shape, dtype=np.complex128)
-    canvas[:,:] = np.exp(-.5*(((2*mesh.XX/w[0])**2 + (2*mesh.YY/w[1])**2))**power)
+    canvas[:,:] = np.exp(-.5*(2*(((mesh.XX - center[0])/w[0])**2 + ((mesh.YY - center[1])/w[1])**2))**power)
+
     if norm == "density":
         canvas *= np.sqrt(2/(np.pi*w[0]*w[1])) # Normalize Gaussian
     elif norm == "max":

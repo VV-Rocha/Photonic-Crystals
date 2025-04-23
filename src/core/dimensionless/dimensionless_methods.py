@@ -83,3 +83,16 @@ class WavevectorScale(DimensionlessMethods):
         self.longitudinal_adim_factor = precision_control.np_float(E0 / (k * delta_n_max))
         
         super().__init__()
+        
+class LatticeScale(DimensionlessMethods):
+    def __init__(self,
+                 lattice_parameters,
+                 beam_parameters,
+                 crystal_parameters,
+                 ):
+        a = lattice_parameters.a
+        n = crystal_parameters.n
+        k = 2*pi/beam_parameters.wavelength
+        
+        self.transversal_adim_factor = a
+        self.longitudinal_adim_factor = n * k * a**2

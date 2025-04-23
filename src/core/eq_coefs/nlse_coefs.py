@@ -1,4 +1,4 @@
-from numpy import pi
+from numpy import pi, abs
 from numpy import float64, ndarray
 
 from functools import wraps
@@ -16,6 +16,8 @@ class PhotorefractiveCoefs:
                  crystal_parameters,
                  beam_parameters,
                  adim_method,
+                 store_config = None,
+                 invert_energy_scale: bool = False
                  ):
         """Initialize the coefficients of the Nonlinear Schrodinger Equation emerging in the paraxial propagation of light in photorefractive crystals.
 
@@ -31,22 +33,22 @@ class PhotorefractiveCoefs:
         alpha = crystal_parameters.alpha
         delta_n_max = crystal_parameters.delta_n_max
             
-        self.kinetic = adim_method.longitudinal_adim_factor / (2 * k * n * adim_method.transversal_adim_factor**2)
-        self.potential = c * k * adim_method.longitudinal_adim_factor * delta_n_max
-        self.absorption = alpha * adim_method.longitudinal_adim_factor
+        self.kinetic = -(-1)**invert_energy_scale * adim_method.longitudinal_adim_factor / (2 * k * n * adim_method.transversal_adim_factor**2)
+        self.potential = (-1)**invert_energy_scale * c * k * adim_method.longitudinal_adim_factor * delta_n_max
+        self.absorption = (-1)**invert_energy_scale * alpha * adim_method.longitudinal_adim_factor
         
         self.Isat = crystal_parameters.Isat
         
-    def potential_function(self, I:  float | ndarray) -> float | ndarray:
+    def potential_function(self, field):
         """Potential Function
 
         Args:
-            I (float | ndarray): Intensity of the optical field.
+            field (Field object): Fields object containing the fields and a get_total_intensity() method.
 
         Returns:
             float | ndarray: Nonlinear term of the NLSE in photorefractive crystals.
         """
-        return self.potential * I/(self.Isat + I)
+        return self.potential * field.get_total_intensity()/(self.Isat + field.get_total_intensity())
     
     def print_coefs(self,):
         """Print Coefficients"""
@@ -60,6 +62,7 @@ class CoupledPhotorefractiveCoefs(PhotorefractiveCoefs):
                  beam_parameters,
                  adim_method,
                  store_config=None,
+                 invert_energy_scale: bool = False,
                  ):
         """Initialize the coefficients of the coupled pair of Nonlinear Schrodinger Equation emerging in the paraxial propagation of light in photorefractive crystals.
 
@@ -72,6 +75,7 @@ class CoupledPhotorefractiveCoefs(PhotorefractiveCoefs):
         super().__init__(crystal_parameters = crystal_parameters,
                          beam_parameters = beam_parameters,
                          adim_method = adim_method,
+                         invert_energy_scale = invert_energy_scale,
                          )
         
         n1 = crystal_parameters.n1
@@ -81,25 +85,25 @@ class CoupledPhotorefractiveCoefs(PhotorefractiveCoefs):
         k1 = 2*pi/beam_parameters.wavelength1
         c1 = beam_parameters.c1
         
-        self.kinetic1 = adim_method.longitudinal_adim_factor / (2 * k1 * n1 * adim_method.transversal_adim_factor**2)
-        self.potential1 = c1 * k1 * adim_method.longitudinal_adim_factor * delta_n_max1
-        self.absorption1 = alpha1 * adim_method.longitudinal_adim_factor
+        self.kinetic1 = - (-1)**invert_energy_scale * adim_method.longitudinal_adim_factor / (2 * k1 * n1 * adim_method.transversal_adim_factor**2)
+        self.potential1 = (-1)**invert_energy_scale * c1 * k1 * adim_method.longitudinal_adim_factor * delta_n_max1
+        self.absorption1 = (-1)**invert_energy_scale * alpha1 * adim_method.longitudinal_adim_factor
         
         # self.Isat = crystal_parameters.Isat
         
         if store_config is not None:
             self.store_coefs(store_config)
         
-    def potential_function1(self, I: float | ndarray) -> float | ndarray:
+    def potential_function1(self, field) -> float | ndarray:
         """Potential Function for the second equation
 
         Args:
-            I (float | ndarray): Intensity of the optical field.
+            field (Field2D object): Field object containing the electric fields.
 
         Returns:
             float | ndarray: Nonlinear term of the NLSE in photorefractive crystals.
         """
-        return self.potential1 * I/(self.Isat + I)
+        return self.potential1 * field.get_total_intensity()/(self.Isat + field.get_total_intensity())
         
     def print_coefs(self,):
         """Print Coefficients."""
@@ -122,3 +126,30 @@ class CoupledPhotorefractiveCoefs(PhotorefractiveCoefs):
             f.create_dataset("absorption1", data=self.absorption1)
             f.create_dataset("Isat", data=self.Isat)
         f.close()
+        
+class UniformCoefs:
+    def __init__(self,
+                 kinetic: float = -.5,
+                 potential: float = 1.,
+                 ):
+        self.kinetic = kinetic
+        self.potential = potential
+        
+    def potential_function(self, field):
+        return self.potential * field
+    
+class LocalizationDelocalizationPaper:
+    def __init__(self,
+                 kinetic: float = -.5,
+                 potential: float = 7.,
+                 ):
+        self.kinetic = kinetic
+        self.potential = potential
+        self.absorption = 0.
+        
+    def potential_function(self, field):
+        return self.potential / (1. + abs(field)**2)
+    
+    def print_coefs(self,):
+        """Print Coefficients."""
+        print(f"Kinetic1: {self.kinetic}, Potential1: {self.potential}, Absorption1: {self.absorption}")

@@ -1,3 +1,6 @@
-__all__ = ['PhotorefractiveCrystalCoefs', 'CoupledPhotorefractiveCoefs']
+__all__ = ['PhotorefractiveCrystalCoefs',
+           'CoupledPhotorefractiveCoefs',
+           'LocalizationDelocalizationPaper',
+           'UniformCoefs']
 
-from .nlse_coefs import PhotorefractiveCoefs, CoupledPhotorefractiveCoefs
+from .nlse_coefs import PhotorefractiveCoefs, CoupledPhotorefractiveCoefs, LocalizationDelocalizationPaper, UniformCoefs

@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from numpy import linspace, meshgrid, pi, cos, sin, ndarray
+from numpy import meshgrid, pi, cos, sin, ndarray, arange
 from numpy.fft import fftfreq, fftshift
 
 import arrayfire as af
@@ -76,10 +76,11 @@ class Mesh2D(AdimensionalBox):
         
     def init_mesh(self,):
         """Initialize the mesh grid for the 2D box."""
-        self.x = linspace(-self.lx/2, self.lx/2, self.Nx)
-        self.y = linspace(-self.ly/2, self.ly/2, self.Ny)
-        self.z = linspace(0., self.lz, self.Nz)
-                
+        self.x = arange(-int(self.Nx/2), int(self.Nx/2)) * self.lx/self.Nx
+        
+        self.y = arange(-int(self.Ny/2), int(self.Ny/2)) * self.ly/self.Ny
+        
+        self.z = arange(1, self.Nz+1) * self.lz/self.Nz  
         self.XX, self.YY = meshgrid(self.x, self.y)
         
     def rotate_mesh(self, angle: float,) -> Tuple[ndarray, ndarray]:
@@ -95,12 +96,17 @@ class Mesh2D(AdimensionalBox):
         
     def init_k_mesh(self,):
         """Initialize the k-space mesh."""
-        self.kx = 2*pi*(fftfreq(self.Nx, self.dx))
-        self.ky = 2*pi*(fftfreq(self.Ny, self.dy))
+        self.kx = fftshift(2*pi*(fftfreq(self.Nx, self.dx)))
+        self.ky = fftshift(2*pi*(fftfreq(self.Ny, self.dy)))
+        
+        self.dkx = self.kx[1] - self.kx[0]
+        self.dky = self.ky[1] - self.ky[0]
         
         self.kz = 2*pi*(fftfreq(self.Nz, self.dz))
         
         self.kXX, self.kYY = meshgrid(self.kx, self.ky)
+        self.kXX = fftshift(self.kXX)
+        self.kYY = fftshift(self.kYY)
         
 # % TODO: Change this method to be initialized as the previous ones and add alternative initialization to accept the method currently used. 
 class AfMesh2D():

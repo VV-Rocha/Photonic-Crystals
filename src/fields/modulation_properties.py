@@ -31,10 +31,15 @@ class LatticeConfig:
         self.lattice_parameter = lattice_parameter
         self.p = p
         self.rotation = rotation
-        
+        if self.lattice_parameter is not None:
+            if type(self.lattice_parameter) == float:
+                self.a = self.lattice_parameter
+            else:
+                self.a = self.lattice_parameter[0]
+            
     def store_lattice(self, store_config):
         """Stores the lattice parameters in a hdf5 file.
-        The lattice parameters are stored with the key "lattice_parameter", p with the key "p" and rotation with the key "rotation"."""
+        The lattice parameters are stored with the key "lattice_parameter", p with the key "p" and rotation with the key 'rotation'."""
         filename = store_config.get_input_dir()
         with h5py.File(filename, "a") as f:
             f.create_dataset("lattice_parameter", data=self.lattice_parameter)
@@ -79,10 +84,10 @@ class Lattice(LatticeConfig):
             
 def cache_import_function(init_func):
     @wraps(init_func)
-    def wrapper(self, width, I, power, *args, **kwargs):
+    def wrapper(self, width, center, I, power, *args, **kwargs):
         from .backgrounds.gaussian_profiles import gaussian_25
         GaussianBeamConfig._gaussian = gaussian_25
-        return init_func(self, width, I, power, *args, **kwargs)
+        return init_func(self, width, center, I, power, *args, **kwargs)
     return wrapper
  
 class GaussianBeamConfig:
@@ -90,6 +95,7 @@ class GaussianBeamConfig:
     @cache_import_function
     def __init__(self,
                  width: float | Tuple[float, float],
+                 center: float | Tuple[float, float],
                  I: float,
                  power: int = 1,
                  store_config = None,
@@ -105,6 +111,7 @@ class GaussianBeamConfig:
             store_config (StoreConfig object, optional): StoreConfig object containing the directories on which to store the configuration. Defaults to None.
         """
         self.width = width
+        self.center = center
         self.power = power
         self.I = I
         
@@ -123,6 +130,7 @@ class GaussianBeamConfig:
         """
         return self.__class__._gaussian(mesh = mesh,
                                         w = self.width,
+                                        center = self.center,
                                         I = self.I,
                                         power = self.power,
                                         )
@@ -157,6 +165,7 @@ class LatticeGaussianBeamConfig(GaussianBeamConfig, Lattice):
                  p: float | Tuple[float, ...] = 1.,
                  rotation: float | Tuple[float, ...] = (0., 0.),
                  width: float | Tuple[float, float] = 1.,
+                 center: float | Tuple[float, float] = (0., 0.),
                  power: int = 1,
                  I: float = 1.,
                  lattice_method=None,
@@ -180,6 +189,7 @@ class LatticeGaussianBeamConfig(GaussianBeamConfig, Lattice):
                          p = p,
                          rotation = rotation,
                          width = width,
+                         center = center,
                          power = power,
                          I = I,
                          lattice_method = lattice_method,
@@ -220,6 +230,8 @@ class LatticeGaussianCoupledConfig:
                  power1: int,
                  I: float,
                  I1: float,
+                 center: float | Tuple[float, float] = (0., 0.),
+                 center1: float | Tuple[float, float] = (0., 0.),
                  lattice_method = None,
                  lattice1_method = None,
                  store_config = None,
@@ -247,6 +259,7 @@ class LatticeGaussianCoupledConfig:
                                                p,
                                                rotation,
                                                width,
+                                               center,
                                                power,
                                                I,
                                                lattice_method = lattice_method,
@@ -256,11 +269,14 @@ class LatticeGaussianCoupledConfig:
                                                 p1,
                                                 rotation1,
                                                 width1,
+                                                center1,
                                                 power1,
                                                 I1,
                                                 lattice_method = lattice1_method,
                                                 store_config = None,
                                                 )
+        
+        self.a = lattice1_parameter[0]
         
         if store_config is not None:
             self.store_parameters(store_config)

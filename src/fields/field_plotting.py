@@ -1,8 +1,11 @@
-from numpy import min, max, ndarray
+from numpy import min, max, ndarray, where, nonzero, linspace, meshgrid
 
 from functools import wraps
 
 from typing import Tuple
+
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 
 class Plotting2D:
     """Method for plotting 2D ax of """
@@ -18,6 +21,7 @@ class Plotting2D:
                            fig,
                            show: bool = False,
                            cmap: str = "viridis",
+                           vlims: Tuple[float, float] | None = None,
                            ):
         """Plots the intensity field in a single axis of figure.
 
@@ -28,15 +32,18 @@ class Plotting2D:
             ax (matplotlib axis): Figure axis to plot the image.
             fig (matplotlib figure): Matplotlib figure.
             cmap (str, optional): Colormap used in the figure. Defaults to "viridis".
+            vlims (Tuple[float, float] | None, optional): Sets the minimum and maximum of the colorbar. In the case of None defaults to the colorbar between the minimum and the maximum. Defaults to None.
 
         Returns:
             figure: matplotlib figure
             ax: figure axis
         """
-        im = ax.imshow(self.__class__._abs(field)**2,
-                  extent = extent * 10**(-scientific_notation_power),
-                  cmap = cmap,
-                  )
+        im = ax.imshow(field,
+                       extent = extent * 10**(-scientific_notation_power),
+                       cmap = cmap,
+                       vmin = None if (vlims is None) else vlims[0],
+                       vmax = None if (vlims is None) else vlims[1],
+                       )
         fig.colorbar(im, ax=ax)
                 
     def plotting_phase(self,
@@ -57,10 +64,10 @@ class Plotting2D:
             fig (matplotlib figure): Matplotlib figure.
             cmap (str, optional): Colormap used in the figure. Defaults to "bwr".
         """
-        im = ax.imshow(self.__class__._angle(field),
-                  extent = extent * 10**(-scientific_notation_power),
-                  cmap = cmap,
-                  )
+        im = ax.imshow(field,
+                       extent = extent * 10**(-scientific_notation_power),
+                       cmap = cmap,
+                       )
         fig.colorbar(im, ax=ax)
         
 def cache_import_init(init_func):
@@ -69,8 +76,6 @@ def cache_import_init(init_func):
         from numpy import linspace, meshgrid
         Plotting3D._linspace = linspace
         Plotting3D._meshgrid = meshgrid
-        from matplotlib.pyplot import figure
-        Plotting3D._figure = figure
         return init_func(*args, **kwargs)
     return wrapper
 
@@ -90,7 +95,7 @@ class Plotting3D:
             if (type(zlim) is float) or (type(zlim) is int):
                 zlim = (0, zlim)
             elif zlim is None:
-                zlim = (min(self.__class__._abs(field)**2), max(self.__class__._abs(field)**2))
+                zlim = (min(field), max(field))
             return func(self, field, zlim, *args, **kwargs)
         return wrapper
 
@@ -103,6 +108,9 @@ class Plotting3D:
                           ax,
                           fig,
                           cmap: str = "viridis",
+                          xylim: ndarray | None = None, # if None extent is used else xylim is used [x_min, x_max, y_min, y_max]
+                          link_zlim_vmax: bool = False,
+                          rccount: Tuple[int, int] = (50, 50),
                           ):
         """Plot the 3d intensity field onto an axis.
 
@@ -114,22 +122,58 @@ class Plotting3D:
             ax (matplotlib axis): Figure axis to plot the image.
             fig (matplotlib figure): Matplotlib figure.
             cmap (str, optional): Colormap used in the figure. Defaults to "viridis".
+            xylim (ndarray | None): XY limits to be plotted. If array [x_min, x_max, y_min, y_max] in fundamental units of the system (usually meters). If None the extent limits of the Box is used. Defaults to None.
+            link_zlim_vmax: (bool | None): If True the zlim maximum value is used as vmax of the plot. Defaults to False.
+            rccount (Tuple[int, int] | None): Number of points to be used in plotting the 3d plot. If None is given defaults to (50, 50). Defaults to None.
         """
+
         
-        X, Y = self.__class__._meshgrid(self.__class__._linspace(extent[0], extent[1], field.shape[0]),
-                                       self.__class__._linspace(extent[2], extent[3], field.shape[1]))
-        
+        if xylim is not None:
+            # 1D coordinate vectors
+            X = linspace(extent[0], extent[1], field.shape[0])
+            Y = linspace(extent[2], extent[3], field.shape[1])
+
+            # Boolean masks
+            ix = (X >= xylim[0]) & (X <= xylim[1])
+            iy = (Y >= xylim[2]) & (Y <= xylim[3])
+
+            # Find the contiguous index ranges
+            ix0, ix1 = nonzero(ix)[0][[0, -1]]
+            iy0, iy1 = nonzero(iy)[0][[0, -1]]
+
+            # Slice the field and grid
+            field = field[ix0:ix1+1, iy0:iy1+1]
+            X = X[ix0:ix1+1]#, iy0:iy1+1]
+            Y = Y[iy0:iy1+1]#Y[ix0:ix1+1, iy0:iy1+1]
+            
+            X, Y = meshgrid(X, Y)
+            
+        else:
+            X, Y = meshgrid(linspace(extent[0], extent[1], field.shape[0]),
+                            linspace(extent[2], extent[3], field.shape[1]),
+                            )    
+
         # axis scientific notation
         X *= 10**(-scientific_notation_power)
         Y *= 10**(-scientific_notation_power)
-
+        
+        vmin = 0.
+        if link_zlim_vmax is True:
+            vmax = zlim[1]
+        else:
+            vmax = max(field)
+        
         surf = ax.plot_surface(X,
                                Y,
-                               self.__class__._abs(field)**2,
+                               field,
                                linewidth = 0,
                                antialiased = False,
                                cmap = cmap,
-                               alpha = .8
+                               alpha = .8,
+                               rcount=rccount[0],     # draw every row
+                               ccount=rccount[1],     # draw every column
+                               vmin=vmin,
+                               vmax=vmax,
                                )
 
         fig.colorbar(surf,
@@ -146,27 +190,109 @@ class Plotting3D:
         ax.set_zlabel('Intensity')
         
         
-def cache_import_CoupledPlotting(init_func):
+def cache_ioff(init_func):
     @wraps(init_func)
     def wrapper(self, *args, **kwargs):
-        from numpy import angle
-        CoupledPlotting._angle = angle
-        from numpy import abs
-        CoupledPlotting._abs = abs
-        import matplotlib.pyplot as plt
         plt.ioff()  # Turn off show
-        CoupledPlotting._figure = plt.figure
-        CoupledPlotting._subplots = plt.subplots
-        import matplotlib.gridspec as gridspec
-        CoupledPlotting._gridspec = gridspec
-        from matplotlib.axes import Axes
-        CoupledPlotting._Axes = Axes
         return init_func(self, *args, **kwargs)
     return wrapper
 
+class FieldPlotting(Plotting2D, Plotting3D):
+    @cache_ioff
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    def axis_labels(self, ax, scientific_notation_power):
+        ax.set_xlabel(fr"$x \left(10^{{{scientific_notation_power}}} m\right)$")
+        ax.set_ylabel(fr"$y \left(10^{{{scientific_notation_power}}} m\right)$")        
+        return ax
+    
+    def plot_field(self,
+                    scientific_notation_power=-3,
+                    show: bool = True,
+                    cmap_intensity = "viridis",
+                    ):
+        scientific_notation = 10**scientific_notation_power
+
+        fig = plt.figure()
+
+        gs = gridspec.GridSpec(nrows = 1,
+                                               ncols = 2,
+                                               figure = fig,
+                                               )
+
+        ax0 = fig.add_subplot(gs[0])
+        ax1 = fig.add_subplot(gs[1])
+
+        self.plotting_intensity(self.get_intensity(),
+                                self.extent,
+                                scientific_notation_power,
+                                ax0,
+                                fig,
+                                cmap = cmap_intensity,
+                                )
+        self.plotting_phase(self.get_angle(),
+                            self.extent,
+                            scientific_notation_power,
+                            ax1,
+                            fig,
+                            )
+        
+        ax0 = self.axis_labels(ax0, scientific_notation_power)
+        ax1 = self.axis_labels(ax1, scientific_notation_power)
+            
+        fig.tight_layout()
+        
+        if show:
+            fig.show()
+    
+    def plot_IO_3d(self,
+                   zlim: float | Tuple[float, float],
+                   scientific_notation_power: float,
+                   cmap_3d: str = "viridis",
+                   xylim: ndarray | None = None,
+                   ):
+        """Plot the input and output 2d intensity fields and a 3d plot of the output intensity.
+
+        Args:
+            zlim (float | Tuple[float, float]): Limits on the third axis given by the magnitude of the field.
+            scientific_notation_power (float, optional): power of the scientific notation of the axis.
+            field_number (int, optional): If 0 plots the first field if 1 plots the second field. Defaults to 0.
+            cmap_2d (str, optional): Colormap used in the 2d plot. Defaults to "viridis".
+            cmap_3d (str, optional): Colormap used in the 3d plot. Defaults to "viridis".
+        """
+        # initialize figure
+        fig = plt.figure()
+        # set the grid
+        gs = gridspec.GridSpec(nrows = 1,
+                                               ncols = 1,
+                                               figure = fig,
+                                               )
+        
+        ax_3d_intensity = fig.add_subplot(gs, projection='3d')
+    
+        # 3d intensity field
+        self.plot_intensity_3d(self.get_intensity(),
+                               zlim,
+                               self.extent,
+                               scientific_notation_power,
+                               ax_3d_intensity,
+                               fig,
+                               cmap = cmap_3d,
+                               xylim = xylim,
+                               ) 
+        
+        ax_3d_intensity.set_title("Output 3d Intensity")
+        ax_3d_intensity.set_xlabel(fr"$x \left(10^{{{scientific_notation_power}}} m\right)$")
+        ax_3d_intensity.set_ylabel(fr"$y \left(10^{{{scientific_notation_power}}} m\right)$")    
+        
+        fig.tight_layout()
+        
+        fig.show()
+    
 class CoupledPlotting(Plotting2D, Plotting3D):
     """Add plotting functionality to coupled field notebooks."""
-    @cache_import_CoupledPlotting
+    @cache_ioff
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -189,9 +315,9 @@ class CoupledPlotting(Plotting2D, Plotting3D):
         
         scientific_notation = 10**scientific_notation_power
 
-        fig = self.__class__._figure()
+        fig = plt.figure()
 
-        gs = self.__class__._gridspec.GridSpec(nrows = 2,
+        gs = gridspec.GridSpec(nrows = 2,
                                                ncols = 2,
                                                figure = fig,
                                                )
@@ -201,27 +327,27 @@ class CoupledPlotting(Plotting2D, Plotting3D):
         ax10 = fig.add_subplot(gs[1, 0])
         ax11 = fig.add_subplot(gs[1, 1])
 
-        self.plotting_intensity(self.field,
+        self.plotting_intensity(self.get_intensity(),
                                 self.extent,
                                 scientific_notation_power,
                                 ax00,
                                 fig,
                                 cmap = cmap_intensity,
                                 )
-        self.plotting_phase(self.field,
+        self.plotting_phase(self.get_angle(),
                             self.extent,
                             scientific_notation_power,
                             ax10,
                             fig,
                             )
-        self.plotting_intensity(self.field1,
+        self.plotting_intensity(self.get_intensity1(),
                                 self.extent1,
                                 scientific_notation_power,
                                 ax01,
                                 fig,
                                 cmap = cmap_intensity,
                                 )
-        self.plotting_phase(self.field1,
+        self.plotting_phase(self.get_angle1(),
                             self.extent1,
                             scientific_notation_power,
                             ax11,
@@ -245,6 +371,9 @@ class CoupledPlotting(Plotting2D, Plotting3D):
                    field_number: int = 0, # if 1 print second beam
                    cmap_2d: str = "viridis",
                    cmap_3d: str = "viridis",
+                   xylim: ndarray | None = None,
+                   link_zlim_vmax: bool = False,
+                   savefig: str | None = None,
                    ):
         """Plot the input and output 2d intensity fields and a 3d plot of the output intensity.
 
@@ -256,9 +385,9 @@ class CoupledPlotting(Plotting2D, Plotting3D):
             cmap_3d (str, optional): Colormap used in the 3d plot. Defaults to "viridis".
         """
         # initialize figure
-        fig = self.__class__._figure()
+        fig = plt.figure()
         # set the grid
-        gs = self.__class__._gridspec.GridSpec(nrows = 2,
+        gs = gridspec.GridSpec(nrows = 2,
                                                ncols = 3,
                                                figure = fig,
                                                width_ratios=[1, 1, 1],
@@ -271,28 +400,32 @@ class CoupledPlotting(Plotting2D, Plotting3D):
         ax_3d_intensity = fig.add_subplot(gs[:, 1:], projection='3d')
     
         # 2d intensity fields
-        self.plotting_intensity(self.input_field if (field_number == 0) else self.input_field1,
+        self.plotting_intensity(self.get_intensity() if (field_number == 0) else self.get_intensity1(),
                                 self.extent if (field_number == 0) else self.extent1,
                                 scientific_notation_power,
                                 ax_input_intensity,
                                 fig,
                                 cmap= cmap_2d,
+                                vlims = zlim if link_zlim_vmax else None,
                                 )
-        self.plotting_intensity(self.field if (field_number == 0) else self.field1,
+        self.plotting_intensity(self.get_intensity() if (field_number == 0) else self.get_intensity1(),
                                 self.extent if (field_number == 0) else self.extent1,
                                 scientific_notation_power,
                                 ax_output_intensity,
                                 fig,
                                 cmap = cmap_2d,
+                                vlims = zlim if link_zlim_vmax else None,
                                 )
         # 3d intensity field
-        self.plot_intensity_3d(self.field if (field_number == 0) else self.field1,
+        self.plot_intensity_3d(self.get_intensity() if (field_number == 0) else self.get_intensity1(),
                                zlim,
                                self.extent if (field_number == 0) else self.extent1,
                                scientific_notation_power,
                                ax_3d_intensity,
                                fig,
                                cmap = cmap_3d,
+                               xylim = xylim,
+                               link_zlim_vmax = link_zlim_vmax,
                                )
         
         ax_input_intensity.set_title("Input Beam")
@@ -310,3 +443,6 @@ class CoupledPlotting(Plotting2D, Plotting3D):
         fig.tight_layout()
         
         fig.show()
+        
+        if type(savefig) is str:
+            fig.savefig(savefig, dpi=300, transparent=True)

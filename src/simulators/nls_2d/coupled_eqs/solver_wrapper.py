@@ -62,7 +62,8 @@ class CoupledSimulationBox:
         @wraps(solver)
         def wrapper(self, fields, *args, **kwargs):
             fields.copy_input_fields()
-            return solver(self, fields, *args, **kwargs)
+            solver(self, fields, *args, **kwargs)
+            fields.convert_fields_to_ndarray()
         return wrapper
     
     @copy_input_fields
@@ -80,7 +81,7 @@ class CoupledSimulationBox:
         """
         for _t in range(1, self.mesh.Nz):
             # Single step simulation
-            self.solver_method(fields.field, fields.field1, self.af_mesh, self.coefs, self.precision_control)
+            self.solver_method(fields, self.af_mesh, self.coefs, self.precision_control)
 
             # % TODO: Stride storage is still not functional. Among the reasons is that striding method has not been implemented and all files having the same name are being overwritten.
             if (store_config.get_store_type() == "stride"):    

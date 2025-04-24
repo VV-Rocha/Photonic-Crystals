@@ -35,7 +35,7 @@ class PhotorefractiveCoefs:
             
         self.kinetic = -(-1)**invert_energy_scale * adim_method.longitudinal_adim_factor / (2 * k * n * adim_method.transversal_adim_factor**2)
         self.potential = (-1)**invert_energy_scale * c * k * adim_method.longitudinal_adim_factor * delta_n_max
-        self.absorption = (-1)**invert_energy_scale * alpha * adim_method.longitudinal_adim_factor
+        self.absorption = (-1)**invert_energy_scale * alpha * adim_method.longitudinal_adim_factor / 2
         
         self.Isat = crystal_parameters.Isat
         
@@ -87,7 +87,7 @@ class CoupledPhotorefractiveCoefs(PhotorefractiveCoefs):
         
         self.kinetic1 = - (-1)**invert_energy_scale * adim_method.longitudinal_adim_factor / (2 * k1 * n1 * adim_method.transversal_adim_factor**2)
         self.potential1 = (-1)**invert_energy_scale * c1 * k1 * adim_method.longitudinal_adim_factor * delta_n_max1
-        self.absorption1 = (-1)**invert_energy_scale * alpha1 * adim_method.longitudinal_adim_factor
+        self.absorption1 = (-1)**invert_energy_scale * alpha1 * adim_method.longitudinal_adim_factor / 2
         
         # self.Isat = crystal_parameters.Isat
         

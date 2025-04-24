@@ -31,7 +31,7 @@ def square_planewaves(mesh,
     """
     XX, YY = mesh.rotate_mesh(rotation)
     
-    lattice = 2*(exp(1j*2*pi*XX/a) + exp(-1j*2*pi*XX/a) + exp(1j*2*pi*YY/a) + exp(-1j*2*pi*YY/a))
+    lattice = (exp(1j*2*pi*XX/a) + exp(-1j*2*pi*XX/a) + exp(1j*2*pi*YY/a) + exp(-1j*2*pi*YY/a))
     
     if norm:
         lattice /= max(abs(lattice))  ## normalize between [-1,1].

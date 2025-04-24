@@ -3,6 +3,8 @@ from functools import wraps
 
 from typing import Tuple
 
+from numpy import max
+
 def join_lattices(mesh,
                   a,
                   p,
@@ -13,7 +15,9 @@ def join_lattices(mesh,
     lattice1 = base_lattice(mesh, a[0], rotation[0])
     lattice2 = base_lattice1(mesh, a[1], rotation[1])
     
-    return p[0]*lattice1 + p[1]*lattice2
+    lattice = (p[0]*lattice1 + p[1]*lattice2)/max(p[0]*lattice1 + p[1]*lattice2)
+    
+    return lattice
     
 def double_square(mesh,
                   a: Tuple[float, float],

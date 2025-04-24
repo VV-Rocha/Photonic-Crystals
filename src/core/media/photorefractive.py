@@ -15,6 +15,7 @@ class PhotorefractiveCrystal:
                  Lx: float,
                  Ly: float,
                  Lz: float,
+                 store_config = None,
                  ):
         """Initialize the photorefractive crystal when a single beam is being used.
 

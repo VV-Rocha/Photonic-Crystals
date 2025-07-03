@@ -138,8 +138,9 @@ class UniformCoefs:
     def potential_function(self, field):
         return self.potential * field
     
-class LocalizationDelocalizationPaper:
+class LocalizationDelocalizationPaperCoefs:
     def __init__(self,
+                 lattice,
                  kinetic: float = -.5,
                  potential: float = 7.,
                  ):
@@ -147,8 +148,12 @@ class LocalizationDelocalizationPaper:
         self.potential = potential
         self.absorption = 0.
         
-    def potential_function(self, field):
-        return self.potential / (1. + abs(field)**2)
+        from ...fields import AfField2D
+        
+        self.lattice = AfField2D(lattice)
+        
+    def potential_function(self, fields):
+        return self.potential / (1. + self.lattice.get_total_intensity())
     
     def print_coefs(self,):
         """Print Coefficients."""

@@ -1,3 +1,4 @@
-__all__ = ['coupled_eqs']
+__all__ = ['split_step',
+           ]
 
-from . import coupled_eqs
+from . import split_step

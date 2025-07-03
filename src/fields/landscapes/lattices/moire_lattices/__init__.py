@@ -1,3 +1,3 @@
-__all__ = ['double_lattices']
+__all__ = ['double_lattice']
 
-from .double_lattices import double_lattices
+from .double_lattices import double_lattice

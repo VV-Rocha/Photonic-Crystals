@@ -1,3 +1,3 @@
-__all__ = ['double_square']
+__all__ = ['double_lattices']
 
-from .double_squares import double_square
+from .double_lattices import double_lattices

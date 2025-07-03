@@ -1,10 +1,10 @@
-from .field_plotting import CoupledPlotting
-from .af_field import AfCoupled2D
+from .field import ModulatedField2D
+from .field import CoupledModulatedFields2D
 
-from .field import LandscapedField2D
+from .field_plotting import CoupledPlotting
 from .field_plotting import FieldPlotting
 
-class NotebookAfCoupledSimulation2D(CoupledPlotting, AfCoupled2D):
+class NotebookCoupledFields(CoupledPlotting, CoupledModulatedFields2D):
     """Joins the AfCoupled2D and CoupledPlotting classes to explore simuation in a notebook."""
     def __init__(self,
                  simulation_config,
@@ -18,7 +18,7 @@ class NotebookAfCoupledSimulation2D(CoupledPlotting, AfCoupled2D):
                          precision_control = precision_control,
                          )
         
-class NotebookField(FieldPlotting, LandscapedField2D):
+class NotebookField(FieldPlotting, ModulatedField2D):
     def __init__(self,
                  simulation_config,
                  modulation_config,

@@ -1,3 +1,5 @@
-__all__ = ['square_planewaves']
+__all__ = ['planewave_lattice']
 
-from .square import square_planewaves
+# % TODO: replace square_planewaves with general_planewaves
+
+from .two_dimensional import planewave_lattice

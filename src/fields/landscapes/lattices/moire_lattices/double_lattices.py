@@ -1,4 +1,4 @@
-from ..single_lattices.square import square_planewaves
+from ..single_lattices.two_dimensional import planewave_lattice
 from functools import wraps
 
 from typing import Tuple
@@ -19,11 +19,11 @@ def join_lattices(mesh,
     
     return lattice
     
-def double_square(mesh,
+def double_lattice(mesh,
                   a: Tuple[float, float],
                   p: Tuple[float, float],
                   rotation: Tuple[float, float],
-                  single_lattice=square_planewaves,
+                  single_lattice=planewave_lattice,
                   join_lattices=join_lattices,
                   ):
     """Calls the join_lattices function to create a two lattice Moiré lattice using the single lattice given in single_lattice.
@@ -33,7 +33,7 @@ def double_square(mesh,
         a (Tuple[float, float]): Lattice parameters for the two lattices.
         p (Tuple[float, float]): Lattice weights for the two lattices.
         rotation (Tuple[float, float]): Rotation angles of the lattices in radians.
-        single_lattice (func, optional): Single lattice function. Defaults to square_planewaves.
+        single_lattice (func, optional): Single lattice function. Defaults to planewave_lattice.
         join_lattices (func, optional): Function to join two lattices. Defaults to join_lattices.
 
     Returns:

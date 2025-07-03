@@ -80,7 +80,44 @@ class Lattice(LatticeConfig):
                                                    p,
                                                    rotation,
                                                    )
-            
+    
+class UniformBeamConfig:
+    def __init__(self, I, *args, **kwargs):
+        self.I = I
+        super().__init__(*args,
+                         **kwargs,
+                         )
+    
+    def modulation_function(self,
+                            mesh = None,
+                            ):
+        from numpy import sqrt
+        return sqrt(self.I)
+    
+class LatticeUniformConfig(UniformBeamConfig, Lattice):
+    def __init__(self,
+                 lattice_parameter: float | Tuple[float, ...],
+                 p: float | Tuple[float, ...] = 1.,
+                 rotation: float | Tuple[float, ...] = (0., 0.),
+                 I: float = 1.,
+                 lattice_method=None,
+                 store_config=None,
+                 ):
+        super().__init__(lattice_parameter = lattice_parameter,
+                         p = p,
+                         rotation = rotation,
+                         I = I,
+                         lattice_method = lattice_method,
+                         store_config = store_config,
+                         )
+        
+        self.beam = LatticeGaussianBeamConfig(lattice_parameter,
+                                               p,
+                                               rotation,
+                                               I,
+                                               lattice_method = lattice_method,
+                                               store_config = None,
+                                               )
             
 def cache_import_function(init_func):
     @wraps(init_func)
@@ -161,7 +198,7 @@ class GaussianBeamConfig:
 class LatticeGaussianBeamConfig(GaussianBeamConfig, Lattice):
     """Class to define the Gaussian beam profile with a lattice landscape."""
     def __init__(self,
-                 lattice_parameter: float | Tuple[float, ...],
+                 lattice_parameter: float | Tuple[float, ...] = None,
                  p: float | Tuple[float, ...] = 1.,
                  rotation: float | Tuple[float, ...] = (0., 0.),
                  width: float | Tuple[float, float] = 1.,

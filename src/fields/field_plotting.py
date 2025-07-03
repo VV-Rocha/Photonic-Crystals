@@ -248,7 +248,7 @@ class FieldPlotting(Plotting2D, Plotting3D):
     
     def plot_3d(self,
                    zlim: float | Tuple[float, float],
-                   scientific_notation_power: float,
+                   scientific_notation_power: float = -3,
                    cmap_3d: str = "viridis",
                    xylim: ndarray | None = None,
                    ):

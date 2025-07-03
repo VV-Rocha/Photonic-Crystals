@@ -1,7 +1,3 @@
-# % TODO: The content of this file should be removed. Instead a class should be created in the core.simulator folder that will be used to wrap the solver. This class should be general for single, two or n fields. The fields carried by the input_field object should be handled instead by the solver.
-
-from ....core.mesh import AfMesh2D
-
 from arrayfire import constant, set_backend, set_device
 
 from numpy import ndarray
@@ -9,14 +5,7 @@ from numpy import ndarray
 from functools import wraps
 from copy import deepcopy
 
-def input_fields_to_arrs(func):
-    @wraps(func)
-    def wrapper(self, input_fields, *args, **kwargs):
-        input_fields.convert_fields_to_afarray()
-        return func(self, input_fields, *args, **kwargs)
-    return wrapper
-
-class CoupledSimulationBox:
+class Solver:
     """Wrapper class for the coupled equations solver."""
     def __init__(self,
                  mesh,
@@ -51,22 +40,46 @@ class CoupledSimulationBox:
         # start meshes
         self.mesh = mesh
         self.mesh.init_k_mesh()
-        self.af_mesh = AfMesh2D(self.mesh, self.precision_control)
-        self.af_mesh.init_k_mesh()
         
         self.coefs = coefs
         
         self.storing_method = storing_method
     
-    def copy_input_fields(solver):
-        @wraps(solver)
+    def copy_input(func):
+        @wraps(func)
         def wrapper(self, fields, *args, **kwargs):
-            fields.copy_input_fields()
-            solver(self, fields, *args, **kwargs)
-            fields.convert_fields_to_ndarray()
+            if fields.nfields == "coupled":
+                fields.copy_input_fields()
+            elif fields.nfields == "single":
+                fields.copy_input_field()
+            return func(self, fields, *args, **kwargs)
         return wrapper
     
-    @copy_input_fields
+    def input_fields_to_arrs(solver):
+        @wraps(solver)
+        def wrapper(self, fields, *args, **kwargs):
+            if self.solver_method.numerical == "Arrayfire":
+                from ..core.mesh import AfMesh2D
+                self.af_mesh = AfMesh2D(self.mesh, self.precision_control)
+                self.af_mesh.init_k_mesh()
+                
+                if fields.nfields == "single":
+                    from ..fields import AfField2D
+                    fields = AfField2D(fields)
+                elif fields.nfields == "coupled":
+                    from ..fields import AfCoupledFields2D
+                    fields = AfCoupledFields2D(fields)
+                     
+            solver(self, fields, *args, **kwargs)
+            
+            if fields.nfields == "single":
+                fields.update_Field()
+            elif fields.nfields == "coupled":
+                fields.update_Fields()
+            
+        return wrapper
+    
+    @copy_input
     @input_fields_to_arrs
     def solver(self, fields, store_config=None):
         """Solves the equation using the solver method and the fields provided.
@@ -81,23 +94,26 @@ class CoupledSimulationBox:
         """
         for _t in range(1, self.mesh.Nz):
             # Single step simulation
-            self.solver_method(fields, self.af_mesh, self.coefs, self.precision_control)
+            self.solver_method.solver(fields,
+                                      mesh = self.af_mesh,
+                                      coefs = self.coefs,
+                                      precision_control = self.precision_control,
+                                      )
 
             # % TODO: Stride storage is still not functional. Among the reasons is that striding method has not been implemented and all files having the same name are being overwritten.
-            if (store_config.get_store_type() == "stride"):    
-                fields.store_fields(_t)
-        
-        if (store_config.get_store_type() == "last"):
-            fields.store_fields(index = "last",
-                                )
+            if hasattr(store_config, "get_store_type"):
+                if (store_config.get_store_type() == "stride"):    
+                    fields.store_fields(_t)
+        if hasattr(store_config, "get_store_type"):
+            if (store_config.get_store_type() == "last"):
+                fields.store_fields(index = "last",
+                                    )
 
     def set_device(self):
         """
         Set the ArrayFire device and configure the default data types.
         
-        If using GPU (i.e. device is not 'cpu'), the GPU backend is chosen based on self.gpu_backend 
-        (either 'cuda' or 'opencl') and 32-bit floats and 64-bit complex numbers are enforced.
-        If using 'cpu', then the CPU backend is selected and 64-bit types are allowed.
+        If using GPU (i.e. device is not 'cpu'), the GPU backend is chosen based on self.gpu_backend (either 'cuda' or 'opencl') and 32-bit floats and 64-bit complex numbers are enforced. If using 'cpu', then the CPU backend is selected and 64-bit types are allowed.
         """
         if isinstance(self.device, str) and self.device.lower() == "cpu":
             set_backend("cpu")

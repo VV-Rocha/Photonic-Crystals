@@ -1,17 +1,23 @@
 # % TODO: Add mechanisms to assess missing configuration files and print a warning.
+import os
 
 from functools import wraps
 
 import inspect
 
-def validate_workspace(func):
+default_storage_config = {"store": "last",
+                          "home": "./Data/",
+                          "extension": ".h5",
+                          "stride": 1,
+                          }
+
+def validate_directory(func):
     """Decorator to check if the directory exists."""
     @wraps(func)
     def wrapper(*args, **kwargs):
         sig = inspect.signature(func)
         bound_args = sig.bind(*args, **kwargs)
         bound_args.apply_defaults()
-        import os
         
         self = bound_args.arguments["self"]
         directory = bound_args.arguments["directory"]
@@ -21,6 +27,19 @@ def validate_workspace(func):
         if not os.path.exists(directory):
             os.makedirs(directory)
         return func(*args, **kwargs)
+    return wrapper
+
+def validate_workspace(func):
+    """Decorator to verify if the home directory ends with dash and exists and correct these if needed."""
+    @wraps(func)
+    def wrapper(self, storage_config):
+        if not storage_config["home"].endswith("/"):
+            storage_config["home"] = storage_config["home"] + "/"
+            
+        if not os.path.exists(storage_config["home"]):
+            os.makedirs(storage_config["home"])
+        
+        return func(self, storage_config)
     return wrapper
 
 def endswith_dash(func):
@@ -36,23 +55,20 @@ def endswith_dash(func):
         return func(*bound_args.args, **bound_args.kwargs)
     return wrapper
 
-class StoreConfig:
+class BaseConfig:
     """Base class for storage configurations."""
     @validate_workspace
-    def __init__(self,
-                 directory: str = "./Data/",
-                 extension: str = ".h5",
-                 ):
+    def __init__(self, storage_config=default_storage_config):
         """Initialize the base class for returning directories.
 
         Args:
-            directory (str, optional): Home directory for storing data. Defaults to "./Data/".
+            home (str, optional): Home directory for storing data. Defaults to "./Data/".
             extension (str, optional): Extension used for the storing files. Defaults to ".h5".
         """
-        self.home = directory
-        self.extension = extension
-        
-    @validate_workspace
+        self.home = storage_config["home"]
+        self.extension = storage_config["extension"]        
+    
+    @validate_directory
     @endswith_dash
     def get_directory(self,
                       filename: str = "",
@@ -69,21 +85,16 @@ class StoreConfig:
         """
         return self.home + directory + filename + self.extension
 
-class FundamentalStorage(StoreConfig):
+class FundamentalStorage(BaseConfig):
     """Base class for fundamental storage configurations."""
-    def __init__(self,
-                 directory: str = "./Data/",
-                 extension: str = ".h5",
-                 ):
+    def __init__(self, storage_config=default_storage_config):
         """Initializes the base class for returning the directories for the precision, medium_parameters, beam_config, and box_config.
 
         Args:
-            directory (str, optional): Home directory for storing data. Defaults to "./Data/".
+            home (str, optional): Home directory for storing data. Defaults to "./Data/".
             extension (str, optional): Extension used for the storing files. Defaults to ".h5".
         """
-        super().__init__(directory = directory,
-                         extension = extension,
-                         )
+        super().__init__(storage_config=storage_config)
         
     def get_precision_dir(self,):
         """Returns the directory for the precision configuration file."""
@@ -103,19 +114,14 @@ class FundamentalStorage(StoreConfig):
     
 class FieldStorage(FundamentalStorage):
     """ Base class for field storage configurations."""
-    def __init__(self,
-                 directory: str = "./Data/",
-                 extension: str = ".h5",
-                 ):
+    def __init__(self, storage_config=default_storage_config):
         """Initializes the base class for returning the directories for the field. The field is stored in the directory "Field/". Inherits from the FundamentalStorage class.
 
         Args:
-            directory (str, optional): Home directory for storing data. Defaults to "./Data/".
+            home (str, optional): Home directory for storing data. Defaults to "./Data/".
             extension (str, optional): Extension used for the storing files. Defaults to ".h5".
         """
-        super().__init__(directory = directory,
-                         extension = extension,
-                         )
+        super().__init__(storage_config=storage_config)
 
     def get_field_dir(self,
                       index: str = "",
@@ -142,19 +148,14 @@ class FieldStorage(FundamentalStorage):
     
 class CoupledFieldStorage(FieldStorage):
     """ Base class for two coupled field storage configurations."""
-    def __init__(self,
-                 directory: str = "./Data/",
-                 extension: str = ".h5",
-                 ):
+    def __init__(self, storage_config=default_storage_config):
         """Initializes the base class for returning the directories for the field. The field is stored in the directory "Field1/". Inherits from the FieldStorage class.
 
         Args:
-            directory (str, optional): Home directory for storing data. Defaults to "./Data/".
+            home (str, optional): Home directory for storing data. Defaults to "./Data/".
             extension (str, optional): Extension used for the storing files. Defaults to ".h5".
         """
-        super().__init__(directory = directory,
-                         extension = extension,
-                         )
+        super().__init__(storage_config=storage_config)
         
     def get_field1_dir(self,
                       index: str = "",
@@ -173,26 +174,20 @@ class CoupledFieldStorage(FieldStorage):
     
 class SimulationStorageConfig:
     """Base class for simulation storage configurations."""
-    def __init__(self,
-                 store: str,
-                 directory: str = "./Data/",
-                 extension: str = ".h5",
-                 stride: int = 1,
-                 ):
+    def __init__(self, storage_config=default_storage_config):
         """Initializes the base class for the simulation storage configuration.
 
         Args:
             store (str): Store the last simulation step ('last') or in strides ('strides').
-            directory (str, optional): Home directory for storing data. Defaults to "./Data/".
+            home (str, optional): Home directory for storing data. Defaults to "./Data/".
             extension (str, optional): Extension used for the storing files. Defaults to ".h5".
             stride (int, optional): Number of stride steps to be used if store='strides'. Defaults to 1.
         """
-        super().__init__(directory=directory,
-                         extension=extension,
-                         )
+        super().__init__(storage_config=storage_config)
         
-        self.store = store
-        self.stride = stride
+        self.store = storage_config["store"]
+        if (self.store == "strides"):
+            self.stride = storage_config["stride"]
         
     def get_store_type(self,):
         """Returns the store type."""
@@ -208,44 +203,26 @@ class SimulationStorageConfig:
 
 class StorageConfig(SimulationStorageConfig, FieldStorage):
     """Storage configuration class for the simulation of a single field."""
-    def __init__(self,
-                 store: str,
-                 directory: str = "./Data/",
-                 extension: str = ".h5",
-                 stride: int = 1,
-                 ):
+    def __init__(self, storage_config=default_storage_config,):
         """Initializes the storage configuration class for the simulation of a single field. Inherits from the SimulationStorageConfig and FieldStorage classes.
 
         Args:
             store (str): Store the last simulation step ('last') or in strides ('strides').
-            directory (str, optional): Home directory for storing data. Defaults to "./Data/".
+            home (str, optional): Home directory for storing data. Defaults to "./Data/".
             extension (str, optional): Extension used for the storing files. Defaults to ".h5".
             stride (int, optional): Number of stride steps to be used if store='strides'. Defaults to 1.
         """
-        super().__init__(store = store,
-                         directory = directory,
-                         extension = extension,
-                         stride = stride,
-                         )
+        super().__init__(storage_config=storage_config)
     
 class CoupledStorageConfig(SimulationStorageConfig, CoupledFieldStorage):
     """Storage configuration class for the simulation of two coupled fields."""
-    def __init__(self,
-                 store: str,
-                 directory: str = "./Data/",
-                 extension: str = ".h5",
-                 stride: int = 1,
-                 ):
+    def __init__(self, storage_config=default_storage_config,):
         """Initializes the storage configuration class for the simulation of two coupled fields. Inherits from the SimulationStorageConfig and CoupledFieldStorage classes.
 
         Args:
             store (str): Store the last simulation step ('last') or in strides ('strides').
-            directory (str, optional): Home directory for storing data. Defaults to "./Data/".
+            home (str, optional): Home directory for storing data. Defaults to "./Data/".
             extension (str, optional): Extension used for the storing files. Defaults to ".h5".
             stride (int, optional): Number of stride steps to be used if store='strides'. Defaults to 1.
         """
-        super().__init__(store = store,
-                         directory = directory,
-                         extension = extension,
-                         stride = stride,
-                         )
+        super().__init__(storage_config=storage_config)

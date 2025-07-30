@@ -33,10 +33,7 @@ class SimulationBox(DataClass):
     def initialize(self,):
         # % TODO: Change the objects such that they deal with the config dictionaries internally
         if self.storage_config is not None:
-            self.storage = self.storage_config["object"](directory = self.storage_config["directory"],
-                                                         store = self.storage_config["store"],
-                                                         extension = self.storage_config["extension"],
-                                                         )
+            self.storage = self.storage_config["object"](storage_config=self.storage_config,)
             
         self.precision = self.precision_config["object"](precision=self.precision_config["precision"],
                                        store_config=self.storage,

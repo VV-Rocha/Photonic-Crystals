@@ -27,13 +27,13 @@ from src.simulators import Solver, SimulationBox
 import h5py
 import pickle
 
-periodic_storage_config = {"directory": "./Data/Periodic/",
+periodic_storage_config = {"home": "./Data/Periodic/",
                   "store": "last",
                   "extension": ".h5",
                   "object": CoupledStorageConfig,
                   }
 
-aperiodic_storage_config = {"directory": "./Data/Aperiodic/",
+aperiodic_storage_config = {"home": "./Data/Aperiodic/",
                             "store": "last",
                             "extension": ".h5",
                             "object": CoupledStorageConfig,

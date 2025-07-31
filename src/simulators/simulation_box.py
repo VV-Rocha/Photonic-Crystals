@@ -37,20 +37,7 @@ class SimulationBox(DataClass):
             
         self.precision = self.precision_config["object"](precision_config=self.precision_config,)
             
-        self.medium_parameters = self.medium_config["object"](
-            n = self.medium_config["n"],
-            n1 = self.medium_config["n"],
-            electro_optic_coef = self.medium_config["electro_optic_coef"],
-            electro_optic_coef1 = self.medium_config["electro_optic_coef1"],
-            tension = self.medium_config["tension"],
-            Isat = self.medium_config["Isat"],
-            alpha = self.medium_config["alpha"],
-            alpha1 = self.medium_config["alpha1"],
-            Lx = self.medium_config["Lx"],
-            Ly = self.medium_config["Ly"],
-            Lz = self.medium_config["Lz"],
-            store_config=self.storage,
-            )
+        self.medium_parameters = self.medium_config["object"](medium_config=self.medium_config)
         self.beam_parameters = self.beam_config["object"](
             wavelengths = (self.beam_config["wavelength"], self.beam_config["wavelength1"]),
             cs = (self.beam_config["sign"] * 1., self.beam_config["sign"] * .1),

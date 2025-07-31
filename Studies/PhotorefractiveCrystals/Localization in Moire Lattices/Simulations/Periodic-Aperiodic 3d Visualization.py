@@ -72,7 +72,8 @@ crystal_config = {"n": 2.36,
 
 beam_config = {"wavelength": 633e-9,
                "wavelength1": 532e-9,
-               "sign": -1.,
+               "c": -1.,
+               "c1": -.1,
                "object": TwoBeams,
                }
 

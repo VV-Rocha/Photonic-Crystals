@@ -1,4 +1,11 @@
-__all__ = ['PrecisionControl', 'AfPrecisionControl', 'CoupledStorageConfig', 'StorageConfig', 'FundamentalStorage', 'FieldStorage']
+__all__ = [
+    'PrecisionControl',
+    'AfPrecisionControl',
+    'CoupledStorageConfig',
+    'StorageConfig',
+    'FundamentalStorage',
+    'FieldStorage',
+    ]
 
 from .precision_control import PrecisionControl, AfPrecisionControl
 

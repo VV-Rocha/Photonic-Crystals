@@ -134,7 +134,7 @@ zlim = (0., np.max((np.max(np.abs(aperiodic_SimBox.input_fields.field)**2), np.m
 periodic_SimBox.input_fields.plot_IO_3d(zlim=zlim, scientific_notation_power=-3, xylim=[-tlim, tlim, -tlim, tlim], link_zlim_vmax=True, cmap_2d="jet", cmap_3d="jet", savefig="./periodic atan(3_4) p2_1.png",)
 aperiodic_SimBox.input_fields.plot_IO_3d(zlim=zlim, scientific_notation_power=-3, xylim=[-tlim, tlim, -tlim, tlim], link_zlim_vmax=True, cmap_2d="jet", cmap_3d="jet", savefig="./aperiodic atan(1_sqrt(3)) p2_1.png")
 
-with h5py.File(periodic_storage_config["directory"] + 'periodic_config.h5', "w") as h:
+with h5py.File(periodic_storage_config["home"] + 'periodic_config.h5', "w") as h:
     h.create_dataset("simulation_config", data=np.void(pickle.dumps(simulation_config, protocol=pickle.HIGHEST_PROTOCOL)))
     h.create_dataset("crystal_config", data=np.void(pickle.dumps(crystal_config, protocol=pickle.HIGHEST_PROTOCOL)))
     h.create_dataset("beam_config", data=np.void(pickle.dumps(beam_config, protocol=pickle.HIGHEST_PROTOCOL)))
@@ -144,7 +144,7 @@ with h5py.File(periodic_storage_config["directory"] + 'periodic_config.h5', "w")
     h.create_dataset("periodic_storage_config", data=np.void(pickle.dumps(periodic_storage_config, protocol=pickle.HIGHEST_PROTOCOL)))
     h.create_dataset("periodic_lattice_config", data=np.void(pickle.dumps(periodic_lattice_config, protocol=pickle.HIGHEST_PROTOCOL)))
     
-with h5py.File(aperiodic_storage_config["directory"] + 'aperiodic_config.h5', "w") as h:
+with h5py.File(aperiodic_storage_config["home"] + 'aperiodic_config.h5', "w") as h:
     h.create_dataset("simulation_config", data=np.void(pickle.dumps(simulation_config, protocol=pickle.HIGHEST_PROTOCOL)))
     h.create_dataset("crystal_config", data=np.void(pickle.dumps(crystal_config, protocol=pickle.HIGHEST_PROTOCOL)))
     h.create_dataset("beam_config", data=np.void(pickle.dumps(beam_config, protocol=pickle.HIGHEST_PROTOCOL)))

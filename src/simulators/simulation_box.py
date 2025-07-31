@@ -38,11 +38,9 @@ class SimulationBox(DataClass):
         self.precision = self.precision_config["object"](precision_config=self.precision_config,)
             
         self.medium_parameters = self.medium_config["object"](medium_config=self.medium_config)
-        self.beam_parameters = self.beam_config["object"](
-            wavelengths = (self.beam_config["wavelength"], self.beam_config["wavelength1"]),
-            cs = (self.beam_config["sign"] * 1., self.beam_config["sign"] * .1),
-            store_config = self.storage,
-            )
+        
+        self.beam_parameters = self.beam_config["object"](beam_config=self.beam_config)
+        
         self.adim_method = self.simulation_config["adim_method"](
             self.beam_parameters,
             self.medium_parameters,

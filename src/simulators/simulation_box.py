@@ -48,22 +48,7 @@ class SimulationBox(DataClass):
             )
             
         self.modulation_properties = self.modulation_config["object"](
-            lattice_parameter = None,
-            lattice1_parameter = (self.structure_config["a"], self.structure_config["a"]),
-            p = self.structure_config["p"],
-            p1 = self.structure_config["p1"],
-            rotation = None,
-            rotation1 = (self.structure_config["eta"], self.structure_config["angle"] + self.structure_config["eta"]),
-            width = self.modulation_config["waist"],
-            width1 = self.modulation_config["waist1"],
-            center = self.modulation_config["center"],
-            I = self.modulation_config["I"],
-            I1 = self.modulation_config["I1"],
-            power = self.modulation_config["exponent"],
-            power1 = self.modulation_config["exponent1"],
-            store_config=self.storage,
-            lattice_method=self.structure_config["lattice_method"],
-            lattice1_method=self.structure_config["lattice1_method"],
+            modulation_config = self.modulation_config
             )
     
         self.coefs = self.simulation_config["coefs_object"](

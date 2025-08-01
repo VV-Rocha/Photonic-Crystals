@@ -5,20 +5,30 @@ from typing import Tuple
 
 from numpy import max
 
+def check_tuple(func):
+    @wraps(func)
+    def wrapper(mesh, a, p, *args, **kwargs):
+        if type(a) is not tuple:
+            a = (a, a)
+        if type(p) is not tuple:
+            p = (p, p)
+        return func(mesh, a, p, *args, **kwargs)
+    return wrapper
+
 def join_lattices(mesh,
                   a,
                   p,
                   rotation,
                   base_lattice,
-                  base_lattice1,
                   ):
-    lattice1 = base_lattice(mesh, a[0], rotation[0])
-    lattice2 = base_lattice1(mesh, a[1], rotation[1])
+    lattice1 = base_lattice[0](mesh, a[0], rotation[0])
+    lattice2 = base_lattice[1](mesh, a[1], rotation[1])
     
     lattice = (p[0]*lattice1 + p[1]*lattice2)/max(p[0]*lattice1 + p[1]*lattice2)
     
     return lattice
     
+@check_tuple
 def double_lattice(mesh,
                   a: Tuple[float, float],
                   p: Tuple[float, float],
@@ -43,7 +53,6 @@ def double_lattice(mesh,
                             a,
                             p,
                             rotation,
-                            single_lattice,
                             single_lattice,
                             )
     return lattice

@@ -4,14 +4,10 @@ __all__ = ['Field2D',
            'AfNotebookField',
            'AfField2D',
            'AfCoupled2D',
-           'NotebookAfCoupledSimulation2D',
-           'Lattice',
-           'LatticeConfig',
-           'GaussianBeamConfig',
-           'LatticeGaussianBeamConfig',
-           'LatticeGaussianCoupledConfig',
+           'NotebookAfCoupledSimulation2D',           
            'landscapes',
            'backgrounds',
+           'modulation',
            ]
 
 from .field import Field2D
@@ -25,8 +21,7 @@ from .af_field import AfCoupledFields2D
 from .notebook_field import NotebookField
 from .notebook_field import NotebookCoupledFields
 
-from .modulation_properties import Lattice, LatticeConfig, GaussianBeamConfig, LatticeGaussianBeamConfig, LatticeGaussianCoupledConfig, LatticeUniformConfig
-
 from . import landscapes
 from . import backgrounds
 from . import noise
+from . import modulation

@@ -17,9 +17,9 @@ from src.core.mesh import Mesh2D
 from src.core.beams import TwoBeams
 
 from src.fields import NotebookCoupledFields
-from src.fields import LatticeGaussianCoupledConfig
+from src.fields.modulation.moire_lattice import MoireLatticeGaussianCoupledBeamConfig
 
-from src.fields.landscapes.lattices.moire_lattices import double_lattice
+from src.fields.landscapes.lattices.single_lattices import planewave_lattice
 from src.simulators.nls_2d.split_step import CoupledSplitStep
 
 from src.simulators import Solver, SimulationBox
@@ -53,7 +53,7 @@ simulation_config = {"Nx": 2*1024,
                      "solver": Solver,
                      "solver_engine": CoupledSplitStep(),
                      "device": 0,
-                     "backend": "cuda",
+                     "backend": "0",#"cuda",
                      }
 
 crystal_config = {"n": 2.36,
@@ -77,41 +77,74 @@ beam_config = {"wavelength": 633e-9,
                "object": TwoBeams,
                }
 
-modulation_config = {"I": .3,
-                     "I1": (crystal_config["Isat"])*4.,
-                     "waist": 11.5e-6,
-                     "waist1": 600e-6,
-                     "center": (0*50e-6, -0*10.e-6),
-                     "exponent": 1.,
-                     "exponent1": 4.,
-                     "object": LatticeGaussianCoupledConfig,
-                     }
+state_modulation_config = {"I": .3,
+                           "waist": 11.5e-6,
+                           "center": (0,0),
+                           "exponent": 1.,
+                           }
+
+lattice_modulation_config = {"I": (crystal_config["Isat"])*4.,
+                           "waist": 600e-6,
+                           "center": (0,0),
+                           "exponent": 4.,
+                           }
+
+state_structure_config = {"angle": None,
+                          "a": None,
+                          "p": None,
+                          "lattice_method": None,}
 
 periodic_lattice_config = {"angle": np.atan(3/4),
-                        #    "angle": np.atan(5/12),
+                           "angle1": None,
                            "a": np.pi*.25*27e-6,
-                           "p": None,
-                           "p1": (1., 1.),
-                           "lattice_method": None,
-                           "lattice1_method": double_lattice
+                           "a1": None,
+                           "p": 1.,
+                           "p1": 1.,
+                           "lattice_method": planewave_lattice,
+                           "lattice1_method": planewave_lattice,
                            }
+
 periodic_lattice_config["eta"] = 45*np.pi/180 + .5*(.5*np.pi - periodic_lattice_config["angle"])
+periodic_lattice_config["angle"] += periodic_lattice_config["eta"]
+periodic_lattice_config["angle1"] = periodic_lattice_config["eta"]
+periodic_lattice_config["a1"] = periodic_lattice_config["a"]
+
+periodic_modulation_config = {
+    "structure": state_structure_config,
+    "modulation": state_modulation_config,
+    "structure1": periodic_lattice_config,
+    "modulation1": lattice_modulation_config,
+    "object": MoireLatticeGaussianCoupledBeamConfig,
+}
 
 aperiodic_lattice_config = {"angle": np.atan(1/np.sqrt(3)),
-                           "a": np.pi*.25*27e-6,
-                           "p": None,
-                           "p1": (1., 1.),
-                           "lattice_method": None,
-                           "lattice1_method": double_lattice
+                            "angle1": None,
+                            "a": np.pi*.25*27e-6,
+                            "a1": None,
+                            "p": 1.,
+                            "p1": 1.,
+                            "lattice_method": planewave_lattice,
+                            "lattice1_method": planewave_lattice,
                            }
 aperiodic_lattice_config["eta"] = 45*np.pi/180 + .5*(.5*np.pi - aperiodic_lattice_config["angle"])
+aperiodic_lattice_config["angle"] += aperiodic_lattice_config["eta"]
+aperiodic_lattice_config["angle1"] = aperiodic_lattice_config["eta"] 
+aperiodic_lattice_config["a1"] = aperiodic_lattice_config["a"]
+
+aperiodic_modulation_config = {
+    "structure": state_structure_config,
+    "modulation": state_modulation_config,
+    "structure1": aperiodic_lattice_config,
+    "modulation1": lattice_modulation_config,
+    "object": MoireLatticeGaussianCoupledBeamConfig,
+}
 
 precision_config = {"precision": "double",
                     "object": AfPrecisionControl,
                     }
 
 periodic_SimBox = SimulationBox(structure_config=periodic_lattice_config,
-                                modulation_config=modulation_config,
+                                modulation_config=periodic_modulation_config,
                                 medium_config=crystal_config,
                                 beam_config=beam_config,
                                 simulation_config=simulation_config,
@@ -119,7 +152,7 @@ periodic_SimBox = SimulationBox(structure_config=periodic_lattice_config,
                                 precision_config=precision_config)
 
 aperiodic_SimBox = SimulationBox(structure_config=aperiodic_lattice_config,
-                                modulation_config=modulation_config,
+                                modulation_config=aperiodic_modulation_config,
                                 medium_config=crystal_config,
                                 beam_config=beam_config,
                                 simulation_config=simulation_config,

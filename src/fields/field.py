@@ -217,7 +217,7 @@ class CoupledModulatedFields2D(ModulatedField2D):
                  store_config=None,
                  ):
         super().__init__(simulation_config = simulation_config,
-                     modulation_config = modulation_config.beam,
+                     modulation_config = modulation_config,
                      precision_control = precision_control,
                      )
         self.store_config = store_config

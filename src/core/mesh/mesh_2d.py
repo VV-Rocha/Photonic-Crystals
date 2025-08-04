@@ -1,9 +1,10 @@
 from typing import Tuple
 
-from numpy import meshgrid, pi, cos, sin, ndarray, arange
+from numpy import meshgrid, pi, cos, sin, ndarray, arange, array
 from numpy.fft import fftfreq, fftshift
 
 import arrayfire as af
+
 
 class Box:
     """Class to store the simulation box configuration."""
@@ -15,6 +16,23 @@ class Box:
         self.lx = simulation_config["lx"]
         self.ly = simulation_config["ly"]
         self.lz = simulation_config["lz"]
+        
+        self.field_shape = (self.Nx, self.Ny)
+        
+        self.init_metadata()
+        
+    def init_metadata(self,):
+        if not hasattr(self, "x_min"):
+            x_min = -self.lx/2
+        if not hasattr(self, "x_max"):
+            x_max = self.lx/2
+        if not hasattr(self, "y_min"):
+            y_min = -self.ly/2
+        if not hasattr(self, "y_max"):
+            y_max = self.ly/2
+        if not hasattr(self, "extent"):
+            self.extent = array([x_min, x_max, y_min, y_max])
+        
 
 class AdimensionalBox(Box):
     """Takes care of adimensionalization (if defined)."""

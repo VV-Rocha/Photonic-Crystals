@@ -1,8 +1,8 @@
-import h5py
-
 from functools import wraps
 
 from typing import Tuple
+
+from numpy import pi
 
 class Beam:
     """Beam class holding fundamental beam properties."""
@@ -17,6 +17,8 @@ class Beam:
         """
         self.wavelength = beam_config["wavelength"]
         self.c = beam_config["c"]
+        
+        self.k = 2*pi/self.wavelength
 
 class TwoBeams(Beam):
     """Two beam class for holding fundamental beam properties."""

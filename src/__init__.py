@@ -1,5 +1,5 @@
-__all__ = ["core", "simulators"]
+__all__ = ["core", "models"]
 
 from . import core
 
-from . import simulators
+from . import models

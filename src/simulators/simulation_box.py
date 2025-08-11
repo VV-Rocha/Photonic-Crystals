@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 @dataclass
 class DataClass:
@@ -7,16 +8,10 @@ class DataClass:
     medium_config: dict
     beam_config: dict
     simulation_config: dict
-    storage_config: dict
-    precision_config: dict
-    
+    storage_config: Optional[dict] = None
+    precision_config: Optional[dict] = None
+
 class SimulationBox(DataClass):
-    def super_init(init_func):
-        def wrapper(self, *args, **kwargs):
-            super(type(self), self).__init__(*args, **kwargs)
-            return init_func(self, *args, **kwargs)
-        return wrapper
-    @super_init
     def __init__(
         self,
         structure_config,
@@ -24,14 +19,27 @@ class SimulationBox(DataClass):
         medium_config,
         beam_config,
         simulation_config,
-        storage_config = None,
-        precision_config = None,
-        ):
+        storage_config=None,
+        precision_config=None,
+        *args,
+        **kwargs,
+    ):
+        # call parent dataclass __init__
+        super().__init__(
+            structure_config,
+            modulation_config,
+            medium_config,
+            beam_config,
+            simulation_config,
+            storage_config,
+            precision_config,
+            *args,
+            **kwargs,
+        )
         
-        self.initialize()
+        self.initialize_parameters()
         
     def initialize(self,):
-        # % TODO: Change the objects such that they deal with the config dictionaries internally
         if self.storage_config is not None:
             self.storage = self.storage_config["object"](storage_config=self.storage_config,)
             
@@ -45,19 +53,28 @@ class SimulationBox(DataClass):
             modulation_config = self.modulation_config
             )
         
-        ### Define Simulation Box
-        ## Dimensionalisation
+        ### Define strategies  # % TODO: Strategies are fluxes of information without defining parameters so they should later be defined as inherited classes
         self.adim_method = self.simulation_config["adim_method"](
             self.beam_parameters,
             self.medium_parameters,
             self.precision,
             )
-        ## Grid
+        self.solver = self.simulation_config["solver"](
+            mesh=self.mesh,
+            coefs=self.coefs,
+            solver_method=self.simulation_config["solver_engine"],
+            precision_control=self.precision,
+            device = self.simulation_config["device"],
+            gpu_backend = self.simulation_config["backend"],
+            )
+
+        
+        ### Define parameters
         self.mesh = self.simulation_config["mesh_method"](
             self.simulation_config,
             self.adim_method,
             )
-        ## Initial Conditions
+
         self.input_fields = self.simulation_config["fields"](
             modulation_config=self.modulation_properties,
             precision_control=self.precision,
@@ -68,23 +85,9 @@ class SimulationBox(DataClass):
             self.simulation_config["noise"],
             )
         
-        ### Define Solver
-        ## Eq. coefficients
-        self.coefs = self.simulation_config["coefs_object"](
+        self.model = self.simulation_config["model"](
             self.medium_parameters,
             self.beam_parameters,
-            self.adim_method,
-            self.storage,
-            # invert_energy_scale=True,
-            )
-        ## engine
-        self.solver = self.simulation_config["solver"](
-            mesh=self.mesh,
-            coefs=self.coefs,
-            solver_method=self.simulation_config["solver_engine"],
-            precision_control=self.precision,
-            device = self.simulation_config["device"],
-            gpu_backend = self.simulation_config["backend"],
             )
                 
     def solve(self,):

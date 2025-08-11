@@ -22,6 +22,8 @@ class PhotorefractiveCrystalParameters:
         self.Ly = crystal_config["Ly"]
         self.Lz = crystal_config["Lz"]
         
+        self.Isat = crystal_config["Isat"]
+        
         # Computes and initializes the delta_n_max variable.
         self.delta_n_max = delta_n_max(.5 * self.n**3 * self.electro_optic_coef * self.tension / self.Lx)
 

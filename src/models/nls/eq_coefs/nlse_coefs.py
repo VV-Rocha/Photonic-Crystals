@@ -6,7 +6,7 @@ from numpy import float64, ndarray
 
 from functools import wraps
 
-class PhotorefractiveCoefs(PhotorefractiveCrystalParameters, Beam):
+class PhotorefractiveCoefs(Beam, PhotorefractiveCrystalParameters):
     """Coefficients of the Nonlinear Schrodinger Equation emerging in the paraxial propagation of light in photorefractive crystals."""
     # % TODO: Add a method to store single equation parameters.
     def __init__(self,
@@ -60,31 +60,30 @@ class PhotorefractiveCoefs(PhotorefractiveCrystalParameters, Beam):
 class CoupledPhotorefractiveCoefs(PhotorefractiveCoefs):
     """Coefficients for a pair of coupled Nonlinear Schrodinger Equation emerging in the paraxial propagation of light in photorefractive crystals."""
     def __init__(self,
-                 crystal_parameters,
-                 beam_parameters,
-                 adim_method,
+                 crystal_config,
+                 beam_config,
                  invert_energy_scale: bool = False,
                  ):
         """Initialize the coefficients of the coupled pair of Nonlinear Schrodinger Equation emerging in the paraxial propagation of light in photorefractive crystals.
 
         Args:
-            crystal_parameters (_type_): _description_
-            beam_parameters (_type_): _description_
+            crystal_config (_type_): _description_
+            beam_config (_type_): _description_
             adim_method (_type_): _description_
             store_config (_type_, optional): _description_. Defaults to None.
         """
-        super().__init__(crystal_parameters = crystal_parameters,
-                         beam_parameters = beam_parameters,
+        super().__init__(crystal_config = crystal_config,
+                         beam_config = beam_config,
                          adim_method = adim_method,
                          invert_energy_scale = invert_energy_scale,
                          )
         
-        n1 = crystal_parameters.n1
-        alpha1 = crystal_parameters.alpha1
-        delta_n_max1 = crystal_parameters.delta_n_max1
+        n1 = crystal_config.n1
+        alpha1 = crystal_config.alpha1
+        delta_n_max1 = crystal_config.delta_n_max1
                 
-        k1 = 2*pi/beam_parameters.wavelength1
-        c1 = beam_parameters.c1
+        k1 = 2*pi/beam_config.wavelength1
+        c1 = beam_config.c1
         
         self.kinetic1 = - (-1)**invert_energy_scale * adim_method.longitudinal_adim_factor / (2 * k1 * n1 * adim_method.transversal_adim_factor**2)
         self.potential1 = (-1)**invert_energy_scale * c1 * k1 * adim_method.longitudinal_adim_factor * delta_n_max1

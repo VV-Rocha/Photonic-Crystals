@@ -1,3 +1,3 @@
 __all__ = ['TwoBeamPhotorefractiveCrystal', 'PhotorefractiveCrystal']
 
-from .photorefractive import PhotorefractiveCrystal, TwoBeamPhotorefractiveCrystal
+from .photorefractive import PhotorefractiveCrystalParameters, SecondBeamPhotorefractiveCrystalParameters

@@ -6,6 +6,8 @@ class PhotorefractiveCrystalParameters:
     def __init__(
         self,
         crystal_config,
+        *args,
+        **kwargs,
         ):
         """Initialize the photorefractive crystal when a single beam is being used.
 
@@ -25,7 +27,7 @@ class PhotorefractiveCrystalParameters:
         self.Isat = crystal_config["Isat"]
         
         # Computes and initializes the delta_n_max variable.
-        self.delta_n_max = delta_n_max(.5 * self.n**3 * self.electro_optic_coef * self.tension / self.Lx)
+        self.delta_n_max = delta_n_max(self.n, self.electro_optic_coef, self.tension, self.Lx)
 
 class SecondBeamPhotorefractiveCrystalParameters(PhotorefractiveCrystalParameters):
     """A class representing a photorefractive crystal parameteres for two incident beams."""

@@ -26,7 +26,6 @@ class Arrayfire(DeviceMethods, NpConversionMethods):
         self.backend = device_config["backend"]
         
         super().__init__(
-            device_config = device_config,
             *args,
             **kwargs,
             )

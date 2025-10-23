@@ -21,7 +21,6 @@ class Beam:
         self.k = 2*pi/self.wavelength
                 
         super().__init__(
-            beam_config = beam_config,
             *args,
             **kwargs,
             )

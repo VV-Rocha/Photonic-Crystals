@@ -71,7 +71,6 @@ class CoupledSplitStepSolver(CoupledStorageField, Arrayfire, SplitStepMesh, Spli
         return (self.field)*af.conjg(self.field) + (self.field1)*af.conjg(self.field1)
         
     def af_potential_function(self,):
-        print(">>>", type(self.potential))
         return self.potential * (self.af_get_intensity() / (self.Isat + self.af_get_intensity()))
 
     def af_potential_function1(self,):

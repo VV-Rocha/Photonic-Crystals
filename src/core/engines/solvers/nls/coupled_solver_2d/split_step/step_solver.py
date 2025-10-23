@@ -37,11 +37,11 @@ class SplitStepMethods:
         
     @property
     def exp(self,):
-        return af.exp(af.constant(-self.alpha*self.dz, 1, 1, dtype=self.field.dtype()))
+        return af.exp(af.constant(-self.absorption*self.dz, 1, 1, dtype=self.field.dtype()))
 
     @property
     def exp1(self,):
-        return af.exp(af.constant(-self.alpha1*self.dz, 1, 1, dtype=self.field.dtype()))
+        return af.exp(af.constant(-self.absorption1*self.dz, 1, 1, dtype=self.field.dtype()))
         
     def nonlinear_step(self, field, potential):
         """Inplace implementation of the nonlinear step of the split-step Fourier method for the 2D NLSE.

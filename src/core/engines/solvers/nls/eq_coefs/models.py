@@ -1,5 +1,4 @@
 from .nlse_coefs import PhotorefractiveCoefs, CoupledPhotorefractiveCoefs
-from .decorators import reset_coefs
 
 from numpy import sqrt
 

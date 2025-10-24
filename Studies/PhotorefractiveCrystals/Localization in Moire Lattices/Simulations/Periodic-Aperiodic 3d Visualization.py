@@ -11,7 +11,7 @@ from src.core.boxes.simulation import SimulationBoxMethods
 
 from src.core.engines.solvers.nls.eq_coefs.models import CoupledWavevectorPhotorefractiveModel
 
-from src.core.engines.solvers.nls.coupled_solver_2d.split_step.af.step_solver import CoupledSplitStepSolver
+from src.core.engines.solvers.nls.coupled_solver_2d.split_step.step_solver import CoupledSplitStepSolver
 
 from src.fields.fields_2d import SecondMoireLatticeGaussian2D
 from src.fields.plotting.field_2d import PlotCoupledFields
@@ -167,6 +167,14 @@ class SimulationBox(*inheritance, SimulationBoxMethods):
             modulation_config = modulation_config,
             storage_config = storage_config,
         )
+        self.store_configs(
+            crystal_config,
+            beam_config,
+            simulation_config,
+            device_config,
+            modulation_config,
+            storage_config,
+        )
 
 periodic_SimBox = SimulationBox(
     crystal_config = crystal_config,
@@ -176,7 +184,7 @@ periodic_SimBox = SimulationBox(
     modulation_config = periodic_modulation_config,
     storage_config = periodic_storage_config,
 )
-
+print(">>> Done!")
 aperiodic_SimBox = SimulationBox(
     crystal_config = crystal_config,
     beam_config = beam_config,
@@ -185,7 +193,7 @@ aperiodic_SimBox = SimulationBox(
     modulation_config = aperiodic_modulation_config,
     storage_config = aperiodic_storage_config,
 )
-
+print(">>> Done!")
 free_SimBox = SimulationBox(
     crystal_config = crystal_config,
     beam_config = beam_config,
@@ -194,7 +202,7 @@ free_SimBox = SimulationBox(
     modulation_config = free_modulation_config,
     storage_config = free_storage_config,
 )
-
+print(">>> Done!")
 periodic_SimBox.init()
 aperiodic_SimBox.init()
 free_SimBox.init()
@@ -267,7 +275,9 @@ def plot_3d(simbox, string):
     axs.set_xlabel('x (mm)')
     axs.set_ylabel('y (mm)')
     axs.set_zlabel('Intensity')
-    
+
+    axs.view_init(elev=90, azim=45, roll=15)
+
     fig.savefig(string, dpi=300, transparent=True)
     
 def plot_2d(simbox, string):

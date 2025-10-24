@@ -125,11 +125,11 @@ class CoupledFieldDirectories(FieldDirectories):
         super().__init__(
             *args,
             **kwargs,
-        )        
+        )
         self.make_folder(self.field_rel_directory1)
         
     @property
-    def field_rel_directories(self,):
+    def field_rel_directory1(self,):
         return "Field1/"
         
     def get_field_directory(self, index=None):

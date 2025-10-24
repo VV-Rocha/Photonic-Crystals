@@ -15,10 +15,3 @@ def default_potential1(func):
             potential = self.potential1
         return func(self, potential)
     return wrapper
-
-def reset_coefs(func):
-    def wrapper(self,):
-        super().init_coefs()
-        if self.adimensional_flag:
-            func(self,)
-    return wrapper

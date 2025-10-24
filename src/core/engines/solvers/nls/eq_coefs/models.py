@@ -25,12 +25,11 @@ class WavevectorPhotorefractiveModel(PhotorefractiveCoefs, ModelVerbose):
         self.transversal_adim_factor = 1. / (self.k * sqrt(self.n * self.delta_n_max))
         self.longitudinal_adim_factor = 1. / (self.k * self.delta_n_max)
     
-    @reset_coefs
     def init_coefs(self,):
         """ Initialize the coefficients for the model based on adimensionalization factors."""
         self.kinetic = - .5 * (-1)**self.invert_energy_scale
         self.potential = (-1)**self.invert_energy_scale * self.c
-        self.absorption *= self.longitudinal_adim_factor
+        self.absorption = self.longitudinal_adim_factor * (-1)**self.invert_energy_scale * self.alpha / 2
         
 class PhotorefractiveModel(PhotorefractiveCoefs):
     @property
@@ -59,10 +58,6 @@ class CoupledPhotorefractiveModel(CoupledPhotorefractiveCoefs):
 
         self.transversal_adim_factor = 1.
         self.longitudinal_adim_factor = 1.
-    
-    @reset_coefs
-    def init_coefs(self,):
-        pass
         
 class CoupledWavevectorPhotorefractiveModel(CoupledPhotorefractiveCoefs):
     @property
@@ -79,13 +74,12 @@ class CoupledWavevectorPhotorefractiveModel(CoupledPhotorefractiveCoefs):
         self.transversal_adim_factor = 1. / (self.k * sqrt(self.n * self.delta_n_max))
         self.longitudinal_adim_factor = 1. / (self.k * self.delta_n_max)
     
-    @reset_coefs
     def init_coefs(self,):
         """ Initialize the coefficients for the model based on adimensionalization factors."""
         self.kinetic = - .5 * (-1)**self.invert_energy_scale
         self.potential = (-1)**self.invert_energy_scale * self.c
-        self.absorption *= self.longitudinal_adim_factor * self.alpha / 2
+        self.absorption = self.longitudinal_adim_factor * self.alpha / 2
         
         self.kinetic1 = - .5 * (-1)**self.invert_energy_scale * (self.k/self.k1)
-        self.potential1 = self.c1 * (self.k1/self.k)
-        self.absorption1 = self.longitudinal_adim_factor * self.alpha1 / 2
+        self.potential1 = (-1)**self.invert_energy_scale * self.c1 * (self.k1/self.k)
+        self.absorption1 = (-1)**self.invert_energy_scale * self.longitudinal_adim_factor * self.alpha1 / 2

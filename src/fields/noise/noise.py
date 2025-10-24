@@ -1,11 +1,14 @@
-from numpy.random import normal
+from .base import introduce_noise
 
-def whitenoise_2d_field(A, shape):
-    new_field = normal(0,
-                       scale=A,
-                       size=shape,
-                       )
-    return new_field
-
-def introduce_2d_noise(field, A):
-    field[:,:] = field * (1. + whitenoise_2d_field(A, field.shape))
+class WhitenoiseField:
+    """ Method class to add white noise to a field."""
+    def add_noise(self,):
+        """ Add white noise to the field."""
+        introduce_noise(self.field, self.noise)
+        
+class WhitenoiseCoupledFields(WhitenoiseField):
+    """ Method class to add white noise to coupled fields."""
+    def add_noise(self,):
+        """ Add white noise to both coupled fields."""
+        super().add_noise()
+        introduce_noise(self.field1, self.noise)

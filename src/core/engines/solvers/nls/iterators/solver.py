@@ -20,4 +20,8 @@ class AfTimeSpaceAnalogIterator(AfIterator):
     """ Iterator for time-analog solvers with arrayfire initialization."""
     @property
     def Nsteps(self,):
-        return self.Nz
+        return self._Nsteps
+    
+    @Nsteps.setter
+    def Nsteps(self, value):
+        self._Nsteps = value

@@ -87,5 +87,9 @@ class CoupledModulation(Modulation):
     def modulate_field(self,):
         """ Modulate both fields with their respective envelope and landscape functions."""
         super().modulate_field()
+        self.modulate_field1()
+        
+    def modulate_field1(self,):
+        """ Modulate the second field with its envelope and landscape functions."""
         self.field1 += self.envelope_function1()
         self.field1 *= self.landscape_function1()

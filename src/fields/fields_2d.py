@@ -1,10 +1,13 @@
-from .backgrounds.gaussian_2d import CoupledGaussian2D
+from .backgrounds.gaussian_2d import GaussianProfile2D, CoupledGaussian2D
 
-from .base import CoupledModulation, CoupledFields
+from .base import Modulation, CoupledModulation, CoupledFields
 
-from .noise.noise import WhitenoiseCoupledFields
+from .noise.noise import WhitenoiseCoupledFields, WhitenoiseField
 
-from .landscapes.landscapes_2d import MoireLattice
+from .landscapes.landscapes_2d import MoireLattice, Uniform
+
+from .base import Field
+
 
 class SecondMoireLatticeGaussian2D(CoupledGaussian2D, MoireLattice, CoupledModulation, CoupledFields, WhitenoiseCoupledFields):
     """ Second Moire Lattice Gaussian 2D Coupled Field Class."""
@@ -28,6 +31,20 @@ class SecondMoireLatticeGaussian2D(CoupledGaussian2D, MoireLattice, CoupledModul
             landscape1_config = modulation_config["landscape1_config"],
             envelope_config = modulation_config["envelope_config"],
             envelope1_config = modulation_config["envelope1_config"],
+            *args,
+            **kwargs,
+            )
+        
+class Gaussian2D(GaussianProfile2D, Uniform, Modulation, Field, WhitenoiseField):
+    def __init__(
+        self,
+        modulation_config: dict,
+        *args,
+        **kwargs
+    ):
+        super().__init__(
+            landscape_config = modulation_config["landscape_config"],
+            envelope_config = modulation_config["envelope_config"],
             *args,
             **kwargs,
             )

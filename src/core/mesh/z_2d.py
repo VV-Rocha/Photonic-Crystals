@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from numpy import meshgrid, pi, cos, sin, ndarray, arange, array
+from numpy import meshgrid, pi, cos, sin, ndarray, arange, array, linspace
 from numpy.fft import fftfreq, fftshift
 
 class Box2D:
@@ -61,14 +61,14 @@ class Mesh2D(Box2D):
         self.x = arange(-int(self.Nx/2), int(self.Nx/2)) * self.lx/self.Nx
         self.y = arange(-int(self.Ny/2), int(self.Ny/2)) * self.ly/self.Ny
         
-        self.z = arange(1, self.Nz+1) * self.lz/self.Nz  
+        self.z = linspace(0, self.lz, self.Nz + 1)
         self.xx, self.yy = meshgrid(self.x, self.y)
         
     def adim_grid(self,):
         self.x = arange(-int(self.Nx/2), int(self.Nx/2)) * self.adimensionalize_length(self.lx)/self.Nx
         self.y = arange(-int(self.Ny/2), int(self.Ny/2)) * self.adimensionalize_length(self.ly)/self.Ny
         
-        self.z = arange(1, self.Nz + 1) * self.adimensionalize_time(self.lz)/self.Nz
+        self.z = linspace(0, self.adimensionalize_time(self.lz), self.Nz + 1)
 
         self.xx, self.yy = meshgrid(self.x, self.y)
         

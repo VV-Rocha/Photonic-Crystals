@@ -1,4 +1,4 @@
-from numpy import ndarray, array, arange, pi
+from numpy import ndarray, array, arange, pi, linspace
 from numpy.fft import fftshift, fftfreq
 
 class Box1D:
@@ -51,13 +51,13 @@ class Mesh1D(Box1D):
     def grid(self,):
         """ Initialize the mesh grid for the 1D box."""
         self.x = arange(-int(self.Nx/2), int(self.Nx/2)) * self.lx/self.Nx
-        self.z = arange(-int(self.Nz/2), int(self.Nz/2), self.lz/self.Nz)
+        self.z = linspace(0, self.lz, self.Nz + 1)
         
     def adim_grid(self,):
         """ Initialize the adimensionalized mesh grid for the 1D box."""
         self.x = arange(-int(self.Nx/2), int(self.Nx/2)) * self.adimensionalize_length(self.lx)/self.Nx
 
-        self.z = arange(0., self.Nz) * self.adimensionalize_time(self.lz)/self.Nz
+        self.z = linspace(0, self.adimensionalize_time(self.lz), self.Nz + 1)
         
     def init_grid(self,):
         """ Initialize the mesh grid based on adimensionalization settings."""

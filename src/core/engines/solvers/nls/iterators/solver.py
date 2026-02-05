@@ -2,7 +2,7 @@ class Iterator:
     """ Base iterator class for solvers."""    
     def solve(self,):
         """ Main solve method to iterate through steps."""
-        for z in range(self.Nsteps-1):
+        for z in range(self.Nsteps):
             self.step_solver()  # solves (in place) for the next step
 
             self.store_step(z+1)

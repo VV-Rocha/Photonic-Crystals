@@ -2,7 +2,7 @@ import numpy as np
 
 def whitenoise_field(
     A: float,
-    shape: int | tuple,
+    shape,
     ) -> np.ndarray:
     """ Generate a white noise field with given amplitude and shape.
 

@@ -93,3 +93,8 @@ class CoupledModulation(Modulation):
         """ Modulate the second field with its envelope and landscape functions."""
         self.field1 += self.envelope_function1()
         self.field1 *= self.landscape_function1()
+        
+    def adimensionalize_field(self,):
+        super().adimensionalize_field()
+        self.adimensionalize_envelope1()
+        self.adimensionalize_landscape1()

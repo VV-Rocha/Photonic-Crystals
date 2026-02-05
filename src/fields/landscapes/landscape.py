@@ -1,5 +1,5 @@
 from .phase_step.phase_step import phase_step
-from .dark_soliton.base import DarkSolitonConfig, dip
+from .dark_soliton.base import DarkSolitonConfig1D, dip
 
 class PhaseStep:
     """ Phase step landscape configuration class."""
@@ -45,7 +45,7 @@ class Plane:
         """ Adimensionalize landscape parameters."""
         pass
 
-class DarkSoliton(DarkSolitonConfig):
+class DarkSoliton(DarkSolitonConfig1D):
     """ Dark soliton landscape configuration class."""
     def __init__(
         self,

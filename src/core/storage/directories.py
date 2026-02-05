@@ -102,11 +102,14 @@ class FieldDirectories(FolderMethods):
         
     def field_filename(self, index=None):
         """ Get the filename for the field based on the storage mode and index."""
-        if self.store.lower() == "last":
-            dir_ = "field_last.h5"
-        elif self.store.lower() == "stride":
-            if (index == None) or (index == ""):
-                index = self.stride_count
+        if index is None:
+            if self.store.lower() == "last":
+                dir_ = "field_last.h5"
+            elif self.store.lower() == "stride":
+                if (index == None) or (index == ""):
+                    index = self.stride_count
+                dir_ = "field_" + str(index) + ".h5"
+        else:
             dir_ = "field_" + str(index) + ".h5"
         return dir_
     

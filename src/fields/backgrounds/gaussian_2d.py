@@ -1,8 +1,7 @@
-from .base import CoupledGaussianConfig2D, gaussian_25_2d
+from .base import GaussianConfig2D, CoupledGaussianConfig2D, gaussian_25_2d
 
 
-class CoupledGaussian2D(CoupledGaussianConfig2D):
-    """ Coupled 2D Gaussian envelope field."""
+class GaussianProfile2D(GaussianConfig2D):
     def envelope_function(self,):
         """ Compute the first Gaussian envelope function."""
         return gaussian_25_2d(
@@ -14,7 +13,9 @@ class CoupledGaussian2D(CoupledGaussianConfig2D):
             self.exponent,
             self.field_shape,
         )
-    
+
+class CoupledGaussian2D(GaussianProfile2D, CoupledGaussianConfig2D):
+    """ Coupled 2D Gaussian envelope field."""
     def envelope_function1(self,):
         """ Compute the second Gaussian envelope function."""
         return gaussian_25_2d(

@@ -2,7 +2,7 @@ import numpy as np
 from typing import Tuple
 
 def gaussian_25_1d(
-    x: float | np.ndarray,
+    x,
     w: float,
     center: float,
     I: float,
@@ -31,8 +31,8 @@ def gaussian_25_1d(
     return canvas
 
 def gaussian_25_2d(
-    x: float | np.ndarray,
-    y: float | np.ndarray,
+    x,
+    y,
     width: Tuple[float, float],
     center: Tuple[float, float],
     I: float,
@@ -62,7 +62,7 @@ def gaussian_25_2d(
     
     return canvas
 
-def float_to_tuple(value: int | float) -> Tuple[float, float]:
+def float_to_tuple(value) -> Tuple[float, float]:
     """ Convert a float or int to a tuple of two identical floats.
 
     Args:
@@ -163,8 +163,7 @@ class CoupledGaussianConfig2D(GaussianConfig2D):
             **kwargs,
         )
 
-    def adimensionalize_envelope(self,):
+    def adimensionalize_envelope1(self,):
         """ Adimensionalize the parameters of both Gaussian envelopes."""
-        super().adimensionalize_envelope()
         self.width1 = (self.adimensionalize_length(self.width1[0]), self.adimensionalize_length(self.width1[1]))
         self.center1 = (self.adimensionalize_length(self.center1[0]), self.adimensionalize_length(self.center1[1]))

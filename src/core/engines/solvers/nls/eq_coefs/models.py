@@ -46,6 +46,10 @@ class PhotorefractiveModel(PhotorefractiveCoefs):
         self.longitudinal_adim_factor = 1.
         
 class CoupledPhotorefractiveModel(CoupledPhotorefractiveCoefs):
+    @property
+    def adimensional_flag(self,):
+        return False
+    
     def init_model(self,):
         """ Initialize the model by computing adimensionalization factors and coefficients."""
         self.adimensionalization_factors()
@@ -53,7 +57,6 @@ class CoupledPhotorefractiveModel(CoupledPhotorefractiveCoefs):
         
     def adimensionalization_factors(self,):
         """ Compute adimensionalization factors for transversal and longitudinal directions."""
-        self.adimensional_flag = False  # indicates if adimensionalization occurs
 
         self.transversal_adim_factor = 1.
         self.longitudinal_adim_factor = 1.

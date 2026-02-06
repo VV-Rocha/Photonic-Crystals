@@ -1,7 +1,22 @@
 from .lattices.single_lattices.two_dimensional import planewave_lattice
 from .lattices.moire_lattices.double_lattices import lattice_sum
 
-class LatticeConfig:
+class Uniform:
+    def __init__(
+        self,
+        landscape_config,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+    
+    def landscape_function(self,):
+        return 1.
+    
+    def adimensionalize_landscape(self,):
+        pass
+    
+class LatticeConfig(Uniform):
     """ 2D Lattice landscape configuration class."""
     def __init__(
         self,
@@ -25,28 +40,11 @@ class LatticeConfig:
         
         super().__init__(*args, **kwargs)
 
-    def adimensionalize_landscape(self,):
+    def adimensionalize_landscape1(self,):
         """ Adimensionalize lattice parameters."""
         self.a = (self.adimensionalize_length(self.a[0]), self.adimensionalize_length(self.a[1]))
 
-
 class MoireLattice(LatticeConfig):
-    def __init__(
-        self,
-        landscape_config: dict | None = None,
-        *args,
-        **kwargs,
-        ):
-        """ Initialize moire lattice landscape.
-
-        Args:
-            landscape_config (None, optional): Configuration dictionary for the moire lattice. Defaults to None.
-        """
-        super().__init__(
-            *args,
-            **kwargs,
-        )
-
     def landscape_function(self,):
         """ Generate the constant moire lattice landscape function."""
         return 1.

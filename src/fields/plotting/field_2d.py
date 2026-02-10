@@ -118,6 +118,73 @@ class PlotCoupledFields2D(Plot2DField, Extent, Axis):
         self.init_extent()
         self.init_vlims1()
         self.init_axis()
+
+    def plot_2d_fields(
+        self,
+        filename=None,
+    ):
+        fig, axs = plt.subplots(2,2)
+        fig, axs[0,0] = plot2d_wrapped(
+            intensity = self.get_intensity()[self.xx_indices, self.yy_indices],
+            extent = self.dimensionalize_extent(),
+            vlims = self.vlims,
+            fig = fig,
+            axs = axs[0,0],
+            alpha=None,
+            cmap="Greens" if self.wavelength==532e-9 else "Reds",
+            axis_labels = self.axis_labels,
+            colorbar_label = self.colorbar_label,
+            zorder = None,
+            norm = None,
+        )
+        
+        fig, axs[0,1] = plot2d_wrapped(
+            intensity = np.angle(self.field[self.xx_indices, self.yy_indices]),
+            extent = self.dimensionalize_extent(),
+            vlims = self.vlims,
+            fig = fig,
+            axs = axs[0,1],
+            alpha=None,
+            cmap = "RdBu",
+            axis_labels = self.axis_labels,
+            colorbar_label = "Phase",
+            zorder = None,
+            norm = None,
+        )
+        
+        fig, axs[1,0] = plot2d_wrapped(
+            intensity = self.get_intensity1()[self.xx_indices, self.yy_indices],
+            extent = self.dimensionalize_extent(),
+            vlims = self.vlims,
+            fig = fig,
+            axs = axs[1,0],
+            alpha=None,
+            cmap="Greens" if self.wavelength1==532e-9 else "Reds",
+            axis_labels = self.axis_labels,
+            colorbar_label = self.colorbar_label,
+            zorder = None,
+            norm = None,
+        )
+        
+        fig, axs[1,1] = plot2d_wrapped(
+            intensity = np.angle(self.field1[self.xx_indices, self.yy_indices]),
+            extent = self.dimensionalize_extent(),
+            vlims = self.vlims,
+            fig = fig,
+            axs = axs[1,1],
+            alpha=None,
+            cmap = "RdBu",
+            axis_labels = self.axis_labels,
+            colorbar_label = "Phase",
+            zorder = None,
+            norm = None,
+        )
+        
+        if filename is not None:
+            fig.tight_layout()
+            fig.savefig(self.get_directory() + filename + ".png", dpi=300, transparent=True)
+        
+        return fig, axs
         
     def plot_2d_coupled(
         self,

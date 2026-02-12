@@ -36,7 +36,7 @@ class SplitStepSolver(
         """Inplace single step evolution of the 2D NLSE using the split-step Fourier method.
         """
         # half linear step
-        self.linear_step(self.field, self.kinetic)
+        self.linear_step(self.field, self.kinetic, self.dz)
         
         # nonlinear step
         self.nonlinear_step(
@@ -48,4 +48,4 @@ class SplitStepSolver(
         self.absorption_step(self.field, self.exp)
         
         # half linear step
-        self.linear_step(self.field, self.kinetic)
+        self.linear_step(self.field, self.kinetic, self.dz)

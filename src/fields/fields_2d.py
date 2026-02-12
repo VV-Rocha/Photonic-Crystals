@@ -4,7 +4,9 @@ from .base import Modulation, CoupledModulation, CoupledFields
 
 from .noise.noise import WhitenoiseCoupledFields, WhitenoiseField
 
-from .landscapes.landscapes_2d import MoireLattice, Uniform
+from .landscapes.base import Uniform
+from .landscapes.landscapes_2d import MoireLattice
+from .landscapes.landscape import DarkSoliton, PhaseStep
 
 from .base import Field
 
@@ -14,5 +16,11 @@ class SecondMoireLatticeGaussian2D(CoupledGaussian2D, MoireLattice, CoupledModul
     """ Second Moire Lattice Gaussian 2D Coupled Field Class."""
     pass
 
-class Gaussian2D(GaussianProfile2D, Uniform, Modulation, Field, WhitenoiseField, UnpackModulationConfig):
+class Gaussian2D(UnpackModulationConfig, GaussianProfile2D, Uniform, Modulation, Field, WhitenoiseField):
+    pass
+
+class DarkSolitonGaussian2D(GaussianProfile2D, DarkSoliton, Modulation, Field, WhitenoiseField, UnpackModulationConfig):
+    pass
+
+class PhaseStepGaussian2D(UnpackModulationConfig, GaussianProfile2D, PhaseStep, Modulation, Field, WhitenoiseField):
     pass

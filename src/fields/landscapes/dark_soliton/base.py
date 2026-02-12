@@ -1,6 +1,6 @@
 import numpy as np
 
-class DarkSolitonConfig1D:
+class DarkSolitonConfig:
     def __init__(
         self,
         landscape_config: dict,
@@ -43,7 +43,7 @@ def dip(
         w (float): width of the dip.
         center (float): center position of the dip.
         power (int): exponent defining the shape of the dip.
-        shape (int): shape of the output array.
+        shape (int | Tuple[int, int]): shape of the output array.
 
     Returns:
         np.ndarray: Dark soliton landscape array.

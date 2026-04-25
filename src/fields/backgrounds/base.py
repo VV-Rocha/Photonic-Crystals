@@ -1,67 +1,6 @@
 import numpy as np
 from typing import Tuple
 
-def gaussian_25_1d(
-    x,
-    w: float,
-    center: float,
-    I: float,
-    power: int,
-    shape: int,
-    ) -> np.ndarray:
-    """ Generate a 1D Gaussian envelope field.
-
-    Args:
-        x (float | np.ndarray): -x- grid points
-        w (float): width of the Gaussian
-        center (float): center position of the Gaussian
-        I (float): intensity of the Gaussian
-        power (int): exponent power of the Gaussian
-        shape (int): shape of the output array
-
-    Returns:
-        np.ndarray: The generated 1D Gaussian envelope field.
-    """
-    canvas = np.zeros(shape, dtype=np.complex128)
-    canvas[:] = np.exp(-.5*(2*((x - center)/w)**2)**power)
-
-    canvas /= np.max(np.abs(canvas)**2)
-    
-    canvas *= np.sqrt(I)
-    return canvas
-
-def gaussian_25_2d(
-    x,
-    y,
-    width: Tuple[float, float],
-    center: Tuple[float, float],
-    I: float,
-    power: int,
-    shape: Tuple[int, int],
-) -> np.ndarray:
-    """ Generate a 2D Gaussian envelope field.
-
-    Args:
-        x (float | np.ndarray): -x- grid points
-        y (float | np.ndarray): -y- grid points
-        width (Tuple[float, float]): widths of the Gaussian in x and y directions
-        center (Tuple[float, float]): center position of the Gaussian in x and y directions
-        I (float): intensity of the Gaussian
-        power (int): exponent power of the Gaussian
-        shape (Tuple[int, int]): shape of the output array
-
-    Returns:
-        np.ndarray: The generated 2D Gaussian envelope field.
-    """
-    canvas = np.zeros(shape, dtype=np.complex128)
-    canvas[:, :] = np.exp(-.5*(2*(((x - center[0])/width[0])**2 + ((y - center[1])/width[1])**2))**power)
-    
-    canvas /= np.max(np.abs(canvas)**2)
-    
-    canvas *= np.sqrt(I)
-    
-    return canvas
-
 def float_to_tuple(value) -> Tuple[float, float]:
     """ Convert a float or int to a tuple of two identical floats.
 
@@ -167,3 +106,34 @@ class CoupledGaussianConfig2D(GaussianConfig2D):
         """ Adimensionalize the parameters of both Gaussian envelopes."""
         self.width1 = (self.adimensionalize_length(self.width1[0]), self.adimensionalize_length(self.width1[1]))
         self.center1 = (self.adimensionalize_length(self.center1[0]), self.adimensionalize_length(self.center1[1]))
+        
+class CoupledBesselGaussianConfig2D(GaussianConfig2D):
+    def __init__(
+        self,
+        envelope1_config: dict,
+        *args,
+        **kwargs,
+    ):
+        self.kr = envelope1_config["kr"]
+        
+        super().__init__(
+            *args,
+            **kwargs,
+        )
+        
+    def adimensionalize_envelope1(self,):
+        """ Adimensionalize the parameters of both Gaussian envelopes."""
+        self.kr = self.dimensionalize_length(self.kr)  # inverse of length (dimensionalization <-> adimensionalization)
+
+class Uniform1Config:
+    def __init__(
+        self,
+        envelope1_config,
+        *args,
+        **kwargs
+    ):
+        self.I1 = envelope1_config["I"]
+        super().__init__(*args, **kwargs)
+    
+    def adimensionalize_envelope1(self,):
+        pass

@@ -1,8 +1,35 @@
 import h5py
 import numpy as np
+import pickle
 
 from .directories import FieldDirectories
 from .directories import CoupledFieldDirectories
+
+class LoadConfig:
+    """Class to load the configuration file of an experiment."""
+    def __init__(
+        self,
+        home_dir,
+    ):
+        kwargs = self.load_configs(home_dir+"config_dicts.pickle")
+        super().__init__(**kwargs)
+        
+    def load_configs(self, config_dir):
+        with open(config_dir, "rb") as fpkl:
+            configs = pickle.load(fpkl)
+        fpkl.close()
+        # self.add_attributes(
+        #     attributes = configs,
+        # )
+        return configs
+    
+    def add_attributes(
+        self,
+        attributes: dict,
+    ):
+        for key, value in attributes.items():
+            setattr(self, key, value)
+        
 
 class LoadField(FieldDirectories):
     """ Class to load simulation fields from storage."""

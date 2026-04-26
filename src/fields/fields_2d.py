@@ -10,7 +10,6 @@ from .landscapes.landscape import DarkSoliton, PhaseStep
 
 from .base import Field
 
-from .utils import UnpackModulationConfig, CoupledUnpackModulationConfig
 
 class SecondMoireLatticeGaussian2D(CoupledGaussian2D, MoireLattice, CoupledModulation, CoupledFields, WhitenoiseCoupledFields, CoupledUnpackModulationConfig):
     """ Second Moire Lattice Gaussian 2D Coupled Field Class."""

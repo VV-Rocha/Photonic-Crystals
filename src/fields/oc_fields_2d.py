@@ -8,7 +8,6 @@ from .landscapes.landscapes_2d import Uniform
 from .landscapes.encodings.single_mask import PhaseSingleFeature
 from .landscapes.encodings.single_mask import AmplitudeSingleFeature
 
-from .utils import CoupledUnpackModulationConfig
 
 # class CoupledPhaseEncodingTwoFeatureGaussian2D(CoupledGaussian2D, Uniform, PhaseTwoFeature, CoupledModulation, CoupledFields, WhitenoiseCoupledFields, CoupledUnpackModulationConfig):
 #     """ Phase Encoding Two Features Gaussian 2D Coupled Field Class."""

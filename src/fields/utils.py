@@ -1,28 +1,15 @@
-class UnpackModulationConfig:
-    def __init__(
-        self,
-        modulation_config: dict,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(
-            landscape_config = modulation_config["landscape_config"],
-            envelope_config = modulation_config["envelope_config"],
-            *args,
-            **kwargs,
-        )
+from typing import Tuple
 
-class CoupledUnpackModulationConfig(UnpackModulationConfig):
-    def __init__(
-        self,
-        modulation_config: dict,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(
-            landscape1_config = modulation_config["landscape1_config"],
-            envelope1_config = modulation_config["envelope1_config"],
-            modulation_config = modulation_config,
-            *args,
-            **kwargs,
-            )
+
+def float_to_tuple(value) -> Tuple[float, float]:
+    """ Convert a float or int to a tuple of two identical floats.
+
+    Args:
+        value (int | float): The input value to convert.
+
+    Returns:
+        Tuple[float, float]: A tuple containing two identical floats.
+    """
+    if type(value) is not tuple:
+        value = (value*1., value*1.)
+    return value

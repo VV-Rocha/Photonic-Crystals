@@ -7,34 +7,15 @@ from .directories import FieldDirectories, CoupledFieldDirectories
 class StoreConfig:
     def store_configs(
         self,
-        crystal_config: dict,
-        beam_config: dict,
-        simulation_config: dict,
-        device_config: dict,
-        modulation_config: dict,
-        storage_config: dict,
+        **kwargs,
     ):
         """ Store the simulation configuration dictionaries to storage.
 
         Args:
-            crystal_config (dict): Crystal configuration dictionary.
-            beam_config (dict): Beam configuration dictionary.
-            simulation_config (dict): Simulation configuration dictionary.
-            device_config (dict): Device configuration dictionary.
-            modulation_config (dict): Modulation configuration dictionary.
-            storage_config (dict): Storage configuration dictionary.
+            **kwargs: running at the beggining, all input dictionary with configs are stored.
         """
-        config_dict = {
-            "medium_config": crystal_config,
-            "beam_config": beam_config,
-            "simulation_config": simulation_config,
-            "device_config": device_config,
-            "modulation_config": modulation_config,
-            "storage_config": storage_config,   
-        }
-
         with open(self.get_directory("config_dicts.pickle"), "wb") as fpkl:
-            pickle.dump(config_dict, fpkl, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(kwargs, fpkl, protocol=pickle.HIGHEST_PROTOCOL)
         fpkl.close()
 
 class StorageField(FieldDirectories, StoreConfig):
@@ -76,6 +57,8 @@ class CoupledStorageField(CoupledFieldDirectories, StoreConfig):
                 self.store_field(index="last")
         elif self.store.lower() == "stride":
             self.store_field(index=index)
+        elif self.store.lower() == "none":
+            pass
             
     def store_field(self, index=None):
         """ Store the coupled fields to storage.

@@ -2,6 +2,7 @@ import numpy as np
 
 from typing import Tuple
 
+
 def lattice_reciprocal_outer(vectors: np.ndarray) -> np.ndarray:
     """Get the reciprocal lattices for the 2D lattice vectors.
 

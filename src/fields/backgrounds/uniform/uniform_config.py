@@ -8,5 +8,5 @@ class UniformConfig:
         self.I = envelope_config["I"]
         super().__init__(*args, **kwargs)
     
-    def adimensionalize_envelope(self,):
+    def adimensionalize_envelope(self, *args, **kwargs,):
         pass

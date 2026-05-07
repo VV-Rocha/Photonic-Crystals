@@ -26,12 +26,8 @@ class GaussianConfig1D:
             *args,
             **kwargs,
             )
-        
-    def adimensionalize_envelope(self,):
-        """ Adimensionalize the parameters of the Gaussian envelope."""
-        self.width = self.adimensionalize_length(self.width)
-        self.center = self.adimensionalize_length(self.center)
-        
+
+
 class GaussianConfig2D:
     """ 2D Gaussian background field configuration."""
     def __init__(
@@ -57,8 +53,3 @@ class GaussianConfig2D:
             *args,
             **kwargs,
         )
-    
-    def adimensionalize_envelope(self,):
-        """ Adimensionalize the parameters of the Gaussian envelope."""
-        self.width = (self.adimensionalize_length(self.width[0]), self.adimensionalize_length(self.width[1]))
-        self.center = (self.adimensionalize_length(self.center[0]), self.adimensionalize_length(self.center[1]))

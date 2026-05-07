@@ -46,16 +46,22 @@ class Box2D:
 
 class Mesh2D(Box2D):
     """Class to create a 2D mesh for the position representation of functions."""
-    def init_mesh(self,):
+    def __init__(self, *args, **kwargs,):
+        super().__init__(*args, **kwargs,)
+    
+        self.init()
+    
+    def init(self,):
         self.init_grid()
         self.init_steps()
-        
+        self.init_k_grid()
+    
     def init_steps(self,):
         """Initialize the steps in the mesh."""
         self.dx = self.x[1] - self.x[0]
         self.dy = self.y[1] - self.y[0]
         self.dz = self.z[1] - self.z[0]
-        
+    
     def grid(self,):
         """Initialize the mesh grid for the 2D box."""
         self.x = arange(-int(self.Nx/2), int(self.Nx/2)) * self.lx/self.Nx
@@ -63,23 +69,24 @@ class Mesh2D(Box2D):
         
         self.z = linspace(0, self.lz, self.Nz + 1)
         self.xx, self.yy = meshgrid(self.x, self.y)
-        
+    
     def adim_grid(self,):
         self.x = arange(-int(self.Nx/2), int(self.Nx/2)) * self.adimensionalize_length(self.lx)/self.Nx
         self.y = arange(-int(self.Ny/2), int(self.Ny/2)) * self.adimensionalize_length(self.ly)/self.Ny
         
         self.z = linspace(0, self.adimensionalize_time(self.lz), self.Nz + 1)
-
-        self.xx, self.yy = meshgrid(self.x, self.y)
         
+        self.xx, self.yy = meshgrid(self.x, self.y)
+    
     def init_grid(self,):
         if hasattr(self, "adimensionalize_length") and hasattr(self, "adimensionalize_time"):
             self.adim_grid()
         else:
             self.grid()
-        
+    
     def rotate_mesh(self, angle: float,) -> Tuple[ndarray, ndarray]:
-        """Returns the mesh rotated by the given angle in radians.
+        """
+        Returns the mesh rotated by the given angle in radians.
 
         Args:
             angle (float): Rotation angle in radians.

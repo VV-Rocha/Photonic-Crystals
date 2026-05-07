@@ -18,13 +18,13 @@ def _store_config(directory, object_dict):
 
         if isinstance(value, dict):
             subdirectory = directory / key
-            _store(subdirectory, value)
+            _store_config(subdirectory, value)
 
         elif _object_has_dict_attributes(value):
             subdirectory = directory / key
             subdirectory.mkdir(parents=True, exist_ok=True)
 
-            _store(subdirectory, vars(value))
+            _store_config(subdirectory, vars(value))
 
         else:
             filepath = directory / f"{key}.h5"

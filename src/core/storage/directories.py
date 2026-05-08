@@ -33,6 +33,8 @@ class StorageConfig:
         
         self.endswith_dash()
         
+        self.config = self.home + "configs/"
+        
         super().__init__(
             *args,
             **kwargs,
@@ -56,11 +58,16 @@ class FolderMethods(StorageConfig):
         )
         
         self.home_folder()
+        self.config_folder()
         
     def home_folder(self,):
         """ Ensure the home folder exists."""
         if not os.path.exists(self.home):
             os.makedirs(self.home)
+    
+    def config_folder(self,):
+        if not os.path.exists(self.config):
+            os.makedirs(self.config)
     
     def make_folder(self, relative_directory,):
         """ Create a folder at the specified relative directory if it does not exist."""
@@ -117,26 +124,3 @@ class FieldDirectories(FolderMethods):
         """ Get the full directory path for the field based on the storage mode and index."""
         self.automatic_stride()
         return self.get_directory(self.field_rel_directory) + self.field_filename(index)
-    
-class CoupledFieldDirectories(FieldDirectories):
-    def __init__(
-        self,
-        *args,
-        **kwargs,
-    ):
-        """ Initialize coupled field directories and ensure both field folders exist."""
-        super().__init__(
-            *args,
-            **kwargs,
-        )
-        self.make_folder(self.field_rel_directory1)
-        
-    @property
-    def field_rel_directory1(self,):
-        return "Field1/"
-        
-    def get_field_directory(self, index=None):
-        """ Get the full directory paths for both coupled fields based on the storage mode and index."""
-        field_directory = super().get_field_directory(index)
-        field1_directory = self.get_directory(self.field_rel_directory1) + self.field_filename(index)
-        return field_directory, field1_directory

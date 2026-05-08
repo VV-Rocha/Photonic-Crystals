@@ -21,13 +21,14 @@ class StepMethods:
         
     def linear_step(self, box):
         for beam_key, beam_value in box.beams.items():
-            _linear_step(
-                beam_value.field,
-                box.model.beam_coefs[beam_key].kinetic,
-                self.mesh.kxx,
-                self.mesh.kyy,
-                self.mesh.dz,
-            )
+            if beam_value.dynamics:
+                _linear_step(
+                    beam_value.field,
+                    box.model.beam_coefs[beam_key].kinetic,
+                    self.mesh.kxx,
+                    self.mesh.kyy,
+                    self.mesh.dz,
+                )
     
     def af_get_intensity(self, box):
         first = True
@@ -54,23 +55,25 @@ class StepMethods:
         total_intensity_field = self.af_get_intensity(box)
         
         for beam_key, beam_value in box.beams.items():
-            potential_field = self._potential(
-                box.model.beam_coefs[beam_key].potential,
-                total_intensity_field,
-                box.media.shared_properties.Isat,
-            )
-            _nonlinear_step(
-                beam_value.field,
-                potential_field,
-                self.mesh.dz,
-            )
+            if beam_value.dynamics:
+                potential_field = self._potential(
+                    box.model.beam_coefs[beam_key].potential,
+                    total_intensity_field,
+                    box.media.shared_properties.Isat,
+                )
+                _nonlinear_step(
+                    beam_value.field,
+                    potential_field,
+                    self.mesh.dz,
+                )
             
     def absorption_step(self, box):
         for beam_key, beam_value in box.beams.items():
-            _absorption_step(
-                beam_value.field,
-                exp_coefficient(
-                    box.model.beam_coefs[beam_key].absorption,
-                    self.mesh.dz
+            if beam_value.dynamics:
+                _absorption_step(
+                    beam_value.field,
+                    exp_coefficient(
+                        box.model.beam_coefs[beam_key].absorption,
+                        self.mesh.dz
+                    )
                 )
-            )

@@ -18,6 +18,7 @@ class StoreConfig:
             pickle.dump(kwargs, fpkl, protocol=pickle.HIGHEST_PROTOCOL)
         fpkl.close()
 
+
 class StorageField(FieldDirectories, StoreConfig):
     """ Class to store simulation fields to storage."""
     def store_step(
@@ -31,7 +32,7 @@ class StorageField(FieldDirectories, StoreConfig):
             index (_type_, optional): step index to store. Defaults to None.
         """
         if (self.store.lower() == "last"):
-            if (index == self.Nsteps):
+            if (index == box.solver.Nsteps):
                 self.store_field(
                     box,
                     index="last",

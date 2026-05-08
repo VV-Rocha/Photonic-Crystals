@@ -62,7 +62,7 @@ class Mesh2D(Box2D):
         self.dy = self.y[1] - self.y[0]
         self.dz = self.z[1] - self.z[0]
     
-    def grid(self,):
+    def init_grid(self,):
         """Initialize the mesh grid for the 2D box."""
         self.x = arange(-int(self.Nx/2), int(self.Nx/2)) * self.lx/self.Nx
         self.y = arange(-int(self.Ny/2), int(self.Ny/2)) * self.ly/self.Ny
@@ -77,12 +77,6 @@ class Mesh2D(Box2D):
         self.z = linspace(0, self.adimensionalize_time(self.lz), self.Nz + 1)
         
         self.xx, self.yy = meshgrid(self.x, self.y)
-    
-    def init_grid(self,):
-        if hasattr(self, "adimensionalize_length") and hasattr(self, "adimensionalize_time"):
-            self.adim_grid()
-        else:
-            self.grid()
     
     def rotate_mesh(self, angle: float,) -> Tuple[ndarray, ndarray]:
         """

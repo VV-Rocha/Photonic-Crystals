@@ -1,51 +1,29 @@
-import arrayfire as af
-
-from .....arrayfire_utils.facade import Arrayfire
-
-from .....storage.store_methods import StorageField
-
-from .mesh import SplitStepMesh
+from .....arrayfire_utils.device import set_device
 
 from ..iterators.solver import AfTimeSpaceAnalogIterator
+from .step_methods import StepMethods
+from .solver_grid import SolverMeshGrid
 
-from .base import SplitStepMethods
 
 class SplitStepSolver(
-    StorageField,
-    Arrayfire,
-    SplitStepMesh,
-    SplitStepMethods,
+    StepMethods,
     AfTimeSpaceAnalogIterator,
 ):
-    @property
-    def arrayfire_flag(self,):
-        return True
+    def __init__(
+        self,
+        solver_config,
+        *args,
+        **kwargs,
+    ):
+        if ("device" in solver_config.keys()):
+            self.device = solver_config["device"]
+        if ("backend" in solver_config.keys()):
+            self.backend = solver_config["backend"]
+        
+        super().__init__(*args, **kwargs,)
     
-    def init_solver(self,):
-        self.set_device()
+    def init(self, box):
+        set_device(self.device)
         
-        self.init_mesh()
-        
-    def af_get_intensity(self,):
-        return (self.field)*af.conjg(self.field)
-    
-    def af_potential_function(self,):
-        return self.potential * (self.af_get_intensity() / (self.Isat + self.af_get_intensity()))
-    
-    def step_solver(self,):
-        """Inplace single step evolution of the 2D NLSE using the split-step Fourier method.
-        """
-        # half linear step
-        self.linear_step(self.field, self.kinetic, self.dz)
-        
-        # nonlinear step
-        self.nonlinear_step(
-            self.field,
-            self.af_potential_function(),
-        )
-        
-        # absorption step
-        self.absorption_step(self.field, self.exp)
-        
-        # half linear step
-        self.linear_step(self.field, self.kinetic, self.dz)
+        self.mesh = SolverMeshGrid(box)
+        self.mesh.init()

@@ -1,27 +1,38 @@
+from .af_np_interface import AfNpInterface
+
+
 class Iterator:
     """ Base iterator class for solvers."""    
-    def solve(self,):
+    def solve(self, box):
         """ Main solve method to iterate through steps."""
         for z in range(self.Nsteps):
-            self.step_solver()  # solves (in place) for the next step
+            self.step_solver(box)  # solves (in place) for the next step
 
-            self.store_step(z+1)
+            box.storage.store_step(
+                box = box,
+                index = z+1,
+            )
 
-            print(f"{z + 1} / {self.Nz}", end="\r")
-            
+            print(f"{z + 1} / {box.solver.mesh.Nz}", end="\r")
+
+
 class AfIterator(Iterator):
     """ Iterator with arrayfire initialization."""
-    def solve(self,):
-        self.init_af()
-        super().solve()
-        self.end_af()
-            
-class AfTimeSpaceAnalogIterator(AfIterator):
+    def solve(self, box):
+        self.init_af(box)
+        super().solve(box)
+        self.end_af(box)
+
+
+class AfTimeSpaceAnalogIterator(
+    AfIterator,
+    AfNpInterface,
+):
     """ Iterator for time-analog solvers with arrayfire initialization."""
     @property
     def Nsteps(self,):
         if not hasattr(self, '_Nsteps'):
-            self._Nsteps = self.Nz
+            self._Nsteps = self.mesh.Nz
         return self._Nsteps
     
     @Nsteps.setter

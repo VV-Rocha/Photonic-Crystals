@@ -1,21 +1,37 @@
 import numpy as np
 
-def phase_step(
-    x: np.ndarray,
-    a: float=0.,
-    b: float=np.pi
-) -> np.ndarray:
-    """ Generate a phase step landscape.
+from .function import phase_step
 
-    Args:
-        x (np.ndarray): -x- coordinate array.
-        a (float, optional): Constant phase for x<=0. Defaults to 0..
-        b (float, optional): Constant phase for x>0. Defaults to np.pi.
 
-    Returns:
-        np.ndarray: _description_
-    """
-    phase_field = np.zeros(x.shape, dtype=np.complex128)
-    phase_field[np.where(x<=0.)] = np.exp(1j*a)
-    phase_field[np.where(x>0.)] = np.exp(1j*b)
-    return phase_field
+class PhaseStepLandscape:
+    """ Phase step landscape configuration class."""
+    def __init__(
+        self,
+        landscape_config = None,
+        *args,
+        **kwargs,
+        ):
+        """ Initialize phase step landscape.
+
+        Args:
+            landscape_config (None, optional): Configuration dictionary for the phase step. Defaults to None.
+        """
+        if landscape_config is not None:
+            self.a = landscape_config["a"]
+            self.b = landscape_config["b"]
+        else:
+            self.a = 0.
+            self.b = np.pi
+        
+        super().__init__(
+            *args,
+            **kwargs,
+            )
+            
+    def landscape_function(self, mesh):
+        """ Generate the phase step landscape function."""
+        return phase_step(
+            mesh.xx,
+            a = self.a,
+            b = self.b,
+        )

@@ -4,22 +4,7 @@ import pickle
 from .directories import FieldDirectories
 
 
-class StoreConfig:
-    def store_configs(
-        self,
-        **kwargs,
-    ):
-        """ Store the simulation configuration dictionaries to storage.
-
-        Args:
-            **kwargs: running at the beggining, all input dictionary with configs are stored.
-        """
-        with open(self.get_directory("config_dicts.pickle"), "wb") as fpkl:
-            pickle.dump(kwargs, fpkl, protocol=pickle.HIGHEST_PROTOCOL)
-        fpkl.close()
-
-
-class StorageField(FieldDirectories, StoreConfig):
+class StorageField(FieldDirectories):
     """ Class to store simulation fields to storage."""
     def store_step(
         self,

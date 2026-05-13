@@ -1,11 +1,15 @@
 __all__ = [
-    'StorageField',
     'SplitStepSolver',
     'Mesh2D',
     'PhotorefractiveCrystal',
-    'AnalogousTime2DSimulationBox',
     'PhotorefractiveModel',
     'WavevectorPhotorefractiveModel',
+    # boxes
+    'AnalysisBox',
+    'AnalogousTime2DSimulationBox',
+    # storage
+    'StorageField',
+    'LoadSimulation',
     # plotting
     'plot_2d',
     'plot_3d',
@@ -14,7 +18,12 @@ __all__ = [
 
 from .mesh.z_2d import Mesh2D
 
+# boxes
 from .boxes.simulation import AnalogousTime2DSimulationBox
+from .storage.load_methods import LoadSimulation
+
+# analysis boxes
+from .boxes.analysis import AnalysisBox
 
 from .media.photorefractive.photorefractive import PhotorefractiveCrystal
 

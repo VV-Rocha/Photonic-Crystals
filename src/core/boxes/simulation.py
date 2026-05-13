@@ -1,4 +1,4 @@
-from .store_config.store import _store_config
+from .store_config.store import store_config_from_module
 
 
 class AnalogousTime2DSimulationBox:
@@ -18,8 +18,8 @@ class AnalogousTime2DSimulationBox:
         self.solver = solver
         self.storage = storage
     
-    def init(self, *args, **kwargs):
-        self.store_config()
+    def init(self, config_module, *args, **kwargs):
+        self.store_config(config_module)
         
         self.mesh.init()
         self.model.init(self, *args, **kwargs)
@@ -31,7 +31,11 @@ class AnalogousTime2DSimulationBox:
             beam.init(self)
     
     def solve(self,):
+        self.storage.store_step(
+                box = self,
+                index = 0,
+            )
         self.solver.solve(self)
         
-    def store_config(self,):
-        _store_config(self.storage.config, vars(self))
+    def store_config(self, config_module):
+        store_config_from_module(self.storage.config, config_module)

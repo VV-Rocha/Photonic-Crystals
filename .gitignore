@@ -8,8 +8,9 @@ Data/
 *.h5
 *.hdf5
 
-# Image Plot files
+# Result plot files
 *.png
+*.gif
 
 # Logs and temporary files
 *.log

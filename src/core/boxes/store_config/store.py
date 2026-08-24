@@ -41,32 +41,6 @@ def _write_value(h5group, name, value):
     h5group.attrs[name] = repr(value)
 
 
-def build_config_from_module(config_module):
-    beams_config = {
-        "beam_1": {
-            "envelope_config": config_module.state_modulation_config,
-            "landscape_config": config_module.state_structure_config,
-        },
-        "beam_2": {
-            "landscape_config": config_module.lattice_config,
-            "envelope_config": config_module.lattice_modulation_config,
-        },
-    }
-
-    model_config = {
-        "crystal_config": config_module.crystal_config,
-        "lattice_config": config_module.lattice_config,
-    }
-
-    return {
-        "simulation_config": config_module.simulation_config,
-        "beams_config": beams_config,
-        "media_config": config_module.crystal_config,
-        "model_config": model_config,
-        "storage_config": config_module.storage_config,
-    }
-
-
 def _write_config_file(filepath, config):
     filepath = Path(filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -79,15 +53,13 @@ def _write_config_file(filepath, config):
             _write_value(h5file, "value", config)    
 
 
-def store_config_from_module(directory, config_module, overwrite=True):
+def store_config(directory, configs, overwrite=True):
     directory = Path(directory)
 
     if directory.exists() and not overwrite:
         raise FileExistsError(f"Config directory already exists: {directory}")
 
     directory.mkdir(parents=True, exist_ok=True)
-
-    configs = build_config_from_module(config_module)
 
     for config_name, config_value in configs.items():
         filepath = directory / f"{config_name}.h5"

@@ -46,22 +46,27 @@ crystal_config = {
     }
 }
 
-probe_landscape_config = {}
-probe_envelope_config = {
-    "I": 50.,
-    "width": 600e-6,
-    "center": (0, 0),
-    "exponent": 4,
-}
-
-pump_landscape_config = {
-    # "f": tbf,  # float value
-    "size": 200e-6,
-    # "encoding": tbf,  # "amplitude" or "phase"
-}
-pump_envelope_config = {
-    "I": 50.,
-    "width": 600e-6,
-    "center": (0, 0),
-    "exponent": 4,
+beams_config = {
+    "beam_1": {
+        "envelope_config": {
+            "I": 50.,
+            "width": 600e-6,
+            "center": (0, 0),
+            "exponent": 4,
+        },
+        "landscape_config": {}
+    },
+    "beam_2": {
+        "envelope_config": {
+            "I": 50.,
+            "width": 600e-6,
+            "center": (0, 0),
+            "exponent": 4,
+        },
+        "landscape_config": {
+            # "f": tbf,  # float value
+            "size": 200e-6,
+            # "encoding": tbf,  # "amplitude" or "phase"
+        }
+    }
 }

@@ -8,21 +8,7 @@ import core as sim
 import fields
 
 import config
-
-    
-def unpack_configs():
-    configs = {
-        "storage_config": config.storage_config,
-        "simulation_config": config.simulation_config,
-        "probe_landscape_config": config.probe_landscape_config,
-        "probe_envelope_config": config.probe_envelope_config,
-        "pump_landscape_config": config.pump_landscape_config,
-        "pump_envelope_config": config.pump_envelope_config,
-        "crystal_config": config.crystal_config,
-        "solver_config": config.solver_config,
-    }
-    
-    return configs
+config = {k: v for k, v in vars(config).items() if not k.startswith("_")}
 
 def initialize_objects(configs):
     storage = sim.StorageField(configs["storage_config"])
@@ -31,23 +17,21 @@ def initialize_objects(configs):
     
     beams = {
         "beam_1": fields.Gaussian(
-            landscape_config = configs["probe_landscape_config"],
-            envelope_config = configs["probe_envelope_config"],
+            **configs["beams_config"]["beam_1"],
         ),
         "beam_2": fields.ContinuousFeatureGaussian(
-            landscape_config = configs["pump_landscape_config"],
-            envelope_config = configs["pump_envelope_config"],
+            **configs["beams_config"]["beam_2"],
         )
     }
     
     media = sim.PhotorefractiveCrystal(
-        configs["crystal_config"]
+        configs["crystal_config"],
     )
     
     model = sim.WavevectorPhotorefractiveModel()
     
     solver = sim.SplitStepSolver(
-        solver_config = configs["solver_config"]
+        solver_config = configs["solver_config"],
     )
     
     objects = {
@@ -61,26 +45,29 @@ def initialize_objects(configs):
     
     return objects
 
+
 def clean_storage_directory(home_directory, configs):
     configs["storage_config"]["home"] = home_directory
+
 
 def single_feature_solve(
     X,
     feature,
-    configs,
+    config,
 ):
     # change storage directory
-    configs["storage_config"]["home"] += f"feature_{feature}/"
+    config["storage_config"]["home"] += f"feature_{feature}/"
         
     # change feature
-    configs["pump_landscape_config"]["f"] = X[feature]
+    config["beams_config"]["beam_2"]["landscape_config"]["f"] = X[feature]
     
-    objects = initialize_objects(configs)
+    objects = initialize_objects(config)
         
     simulation_box = sim.AnalogousTime2DSimulationBox(**objects)
-        
+    
     simulation_box.init(
         ref_beam="beam_1",
+        config_module = config,
     )
         
     fig, axs = plt.subplots(1, 2)
@@ -98,19 +85,18 @@ def single_feature_solve(
 def main(
     X,  # array with input features [nfeatures, ndimensions]
     encoding,  # "amplitude" or "phase"
-):
-    configs = unpack_configs()
+    config,
+):    
+    _home_directory = config["storage_config"]["home"] + encoding + "/"
     
-    _home_directory = configs["storage_config"]["home"] + encoding + "/"
-    
-    configs["pump_landscape_config"]["encoding"] = encoding
+    config["beams_config"]["beam_2"]["landscape_config"]["encoding"] = encoding
     for feature in range(len(X)):
-        clean_storage_directory(_home_directory, configs)
+        clean_storage_directory(_home_directory, config)
         
         single_feature_solve(
             X,
             feature,
-            configs,
+            config,
         )
         
 if __name__ == "__main__":
@@ -126,4 +112,5 @@ if __name__ == "__main__":
         main(
             X = x,
             encoding = encoding,
+            config = config,
         )

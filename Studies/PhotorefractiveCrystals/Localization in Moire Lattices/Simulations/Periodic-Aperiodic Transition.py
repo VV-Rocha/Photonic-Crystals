@@ -8,35 +8,35 @@ import core as sim
 import fields
 
 import periodic_configs
+periodic_configs = {k: v for k, v in vars(periodic_configs).items() if not k.startswith("_")}
 import aperiodic_configs
+aperiodic_configs = {k: v for k, v in vars(aperiodic_configs).items() if not k.startswith("_")}
 import plot_config
 
 
 def solve(configs):
     # define storage
-    storage = sim.StorageField(configs.storage_config)
+    storage = sim.StorageField(configs["storage_config"])
 
     # define mesh
-    mesh = sim.Mesh2D(configs.simulation_config)
+    mesh = sim.Mesh2D(configs["simulation_config"])
 
     # define beams
     beams = {
         "beam_1": fields.Gaussian(
-            landscape_config = configs.state_structure_config,
-            envelope_config = configs.state_modulation_config,
+            **configs["beams_config"]["beam_1"],
         ),
         "beam_2": fields.MoireLatticeGaussian(
-            landscape_config = configs.periodic_lattice_config,
-            envelope_config = configs.lattice_modulation_config,
+            **configs["beams_config"]["beam_2"],
         ),
     }
 
-    media = sim.PhotorefractiveCrystal(configs.crystal_config)
+    media = sim.PhotorefractiveCrystal(configs["crystal_config"])
 
     model = sim.WavevectorPhotorefractiveModel()
 
     solver = sim.SplitStepSolver(
-        solver_config = configs.solver_config,
+        solver_config = configs["solver_config"],
     )
 
     # define SimulationBox
@@ -50,6 +50,7 @@ def solve(configs):
     )
     
     simulation_box.init(
+        config_module = configs,
         ref_beam = "beam_1",
     )
 

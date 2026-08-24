@@ -23,24 +23,6 @@ simulation_config = {
     "noise": .05,
 }
 
-periodic_lattice_config = {
-    "angle": np.atan(3/4),
-    "angle1": 0.,
-    "a": .25*np.pi*27e-6,
-    "a1": .25*np.pi*27e-6,
-    "p": 1.,
-    "p1": 1.,
-}
-
-state_structure_config = None
-
-state_modulation_config = {
-    "I": .3,
-    "width": 11.5e-6,
-    "center": (0,0),
-    "exponent": 1.,
-}
-
 crystal_config = {
     "shared": {
         "Isat": 3.75,
@@ -67,9 +49,30 @@ crystal_config = {
     }
 }
 
-lattice_modulation_config = {
-    "I": crystal_config["shared"]["Isat"]*16,
-    "width": 700e-6,
-    "center": (0,0),
-    "exponent": 4.,
+beams_config = {
+    "beam_1": {
+        "envelope_config": {
+            "I": .3,
+            "width": 11.5e-6,
+            "center": (0,0),
+            "exponent": 1.,
+        },
+        "landscape_config": {},
+    },
+    "beam_2": {
+        "envelope_config": {
+            "I": crystal_config["shared"]["Isat"]*16,
+            "width": 700e-6,
+            "center": (0,0),
+            "exponent": 4.,
+        },
+        "landscape_config": {
+            "angle": np.atan(3/4),
+            "angle1": 0.,
+            "a": .25*np.pi*27e-6,
+            "a1": .25*np.pi*27e-6,
+            "p": 1.,
+            "p1": 1.,
+        },
+    },
 }

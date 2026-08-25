@@ -1,11 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.append("../../../../src/")
-
-import core as sim
-import fields
+import nlse_toolbox
 
 import periodic_configs
 periodic_configs = {k: v for k, v in vars(periodic_configs).items() if not k.startswith("_")}
@@ -16,31 +12,31 @@ import plot_config
 
 def solve(configs):
     # define storage
-    storage = sim.StorageField(configs["storage_config"])
+    storage = nlse_toolbox.core.StorageField(configs["storage_config"])
 
     # define mesh
-    mesh = sim.Mesh2D(configs["simulation_config"])
+    mesh = nlse_toolbox.core.Mesh2D(configs["simulation_config"])
 
     # define beams
     beams = {
-        "beam_1": fields.Gaussian(
+        "beam_1": nlse_toolbox.fields.Gaussian(
             **configs["beams_config"]["beam_1"],
         ),
-        "beam_2": fields.MoireLatticeGaussian(
+        "beam_2": nlse_toolbox.fields.MoireLatticeGaussian(
             **configs["beams_config"]["beam_2"],
         ),
     }
 
-    media = sim.PhotorefractiveCrystal(configs["crystal_config"])
+    media = nlse_toolbox.core.PhotorefractiveCrystal(configs["crystal_config"])
 
-    model = sim.WavevectorPhotorefractiveModel()
+    model = nlse_toolbox.core.WavevectorPhotorefractiveModel()
 
-    solver = sim.SplitStepSolver(
+    solver = nlse_toolbox.core.SplitStepSolver(
         solver_config = configs["solver_config"],
     )
 
     # define SimulationBox
-    simulation_box = sim.AnalogousTime2DSimulationBox(
+    simulation_box = nlse_toolbox.core.AnalogousTime2DSimulationBox(
         mesh = mesh,
         beams = beams,
         media = media,
@@ -60,13 +56,13 @@ def solve(configs):
 
 
 def plot_2d(box1, box2, plot_obj, beam="beam_1", transparent=False):
-    sim.plot_2d(
+    nlse_toolbox.core.plot_2d(
         box1,
         plot_obj,
         beam = beam,
         transparent = transparent,
     )
-    sim.plot_2d(
+    nlse_toolbox.core.plot_2d(
         box2,
         plot_obj,
         beam = beam,
@@ -75,12 +71,12 @@ def plot_2d(box1, box2, plot_obj, beam="beam_1", transparent=False):
 
 
 def plot_3d(box1, box2, plot_obj, beam="beam_1"):
-    sim.plot_3d(
+    nlse_toolbox.core.plot_3d(
         box1,
         plot_obj,
         beam = beam,
     )
-    sim.plot_3d(
+    nlse_toolbox.core.plot_3d(
         box2,
         plot_obj,
         beam = beam,
@@ -91,7 +87,7 @@ def main():
     box_periodic = solve(periodic_configs)
     box_aperiodic = solve(aperiodic_configs)
 
-    plot_obj = sim.PlotConfigMethods(plot_config.plot_config)
+    plot_obj = nlse_toolbox.core.PlotConfigMethods(plot_config.plot_config)
     beam = "beam_1"
     vmin = np.min([box_periodic.beams[beam].get_intensity(), box_aperiodic.beams[beam].get_intensity()])
     vmax = np.max([box_periodic.beams[beam].get_intensity(), box_aperiodic.beams[beam].get_intensity()])

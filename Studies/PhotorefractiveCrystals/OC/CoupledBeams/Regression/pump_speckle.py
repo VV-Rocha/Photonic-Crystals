@@ -1,36 +1,32 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.append("../../../../../src/")
-
-import core as sim
-import fields
+import nlse_toolbox
 
 import config
 config = {k: v for k, v in vars(config).items() if not k.startswith("_")}
 
 def initialize_objects(configs):
-    storage = sim.StorageField(configs["storage_config"])
+    storage = nlse_toolbox.core.StorageField(configs["storage_config"])
     
-    mesh = sim.Mesh2D(configs["simulation_config"])
+    mesh = nlse_toolbox.core.Mesh2D(configs["simulation_config"])
     
     beams = {
-        "beam_1": fields.Gaussian(
+        "beam_1": nlse_toolbox.fields.Gaussian(
             **configs["beams_config"]["beam_1"],
         ),
-        "beam_2": fields.ContinuousFeatureGaussian(
+        "beam_2": nlse_toolbox.fields.ContinuousFeatureGaussian(
             **configs["beams_config"]["beam_2"],
         )
     }
     
-    media = sim.PhotorefractiveCrystal(
+    media = nlse_toolbox.core.PhotorefractiveCrystal(
         configs["crystal_config"],
     )
     
-    model = sim.WavevectorPhotorefractiveModel()
+    model = nlse_toolbox.core.WavevectorPhotorefractiveModel()
     
-    solver = sim.SplitStepSolver(
+    solver = nlse_toolbox.core.SplitStepSolver(
         solver_config = configs["solver_config"],
     )
     
@@ -63,7 +59,7 @@ def single_feature_solve(
     
     objects = initialize_objects(config)
         
-    simulation_box = sim.AnalogousTime2DSimulationBox(**objects)
+    simulation_box = nlse_toolbox.core.AnalogousTime2DSimulationBox(**objects)
     
     simulation_box.init(
         ref_beam="beam_1",

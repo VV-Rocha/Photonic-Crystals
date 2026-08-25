@@ -16,6 +16,8 @@ Data/
 *.log
 *.tmp
 *.swp
+*.egg-info
+*.lock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

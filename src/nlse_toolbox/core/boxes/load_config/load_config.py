@@ -1,7 +1,4 @@
-# load_stored_config.py
-
 from pathlib import Path
-from types import SimpleNamespace
 
 import h5py
 import numpy as np
@@ -26,6 +23,7 @@ def _read_dataset(dataset):
     if isinstance(value, np.ndarray):
         if value.shape == ():
             return value.item()
+
         return value
 
     if isinstance(value, np.generic):
@@ -46,14 +44,26 @@ def _read_group(group):
             result[key] = value
 
     for key, item in group.items():
+
         if isinstance(item, h5py.Dataset):
             result[key] = _read_dataset(item)
 
         elif isinstance(item, h5py.Group):
             result[key] = _read_group(item)
 
-    if set(result.keys()) == {"value"}:
-        return result["value"]
+    # Reconstruct heterogeneous lists
+    if result and all(key.startswith("item_") for key in result):
+        try:
+            items = sorted(
+                (int(key.split("_", 1)[1]), value)
+                for key, value in result.items()
+            )
+
+            if [i for i, _ in items] == list(range(len(items))):
+                return [value for _, value in items]
+
+        except (ValueError, IndexError):
+            pass
 
     return result
 
@@ -61,18 +71,6 @@ def _read_group(group):
 def _load_h5_file(filepath):
     with h5py.File(filepath, "r") as h5file:
         return _read_group(h5file)
-
-
-def _to_namespace(value):
-    if isinstance(value, dict):
-        return SimpleNamespace(
-            **{
-                key: _to_namespace(sub_value)
-                for key, sub_value in value.items()
-            }
-        )
-
-    return value
 
 
 def _load_config_dict(configs_directory):
@@ -99,61 +97,43 @@ def _load_config_dict(configs_directory):
 
     return configs
 
+
 def _add_config_aliases(configs):
-    """
-    Add names that match the original config module.
-
-    Stored names:
-        media_config
-        model_config
-        beams_config
-
-    Useful aliases:
-        crystal_config
-        lattice_config
-        state_structure_config
-        state_modulation_config
-        lattice_modulation_config
-    """
     configs = dict(configs)
 
     if "media_config" in configs:
         configs["crystal_config"] = configs["media_config"]
 
     if "model_config" in configs:
-        model_config = configs["model_config"]
+        model = configs["model_config"]
 
-        if isinstance(model_config, dict):
-            if "crystal_config" in model_config:
-                configs["crystal_config"] = model_config["crystal_config"]
-
-            if "lattice_config" in model_config:
-                configs["lattice_config"] = model_config["lattice_config"]
+        if "lattice_config" in model:
+            configs["lattice_config"] = model["lattice_config"]
 
     if "beams_config" in configs:
-        beams_config = configs["beams_config"]
+        beams = configs["beams_config"]
 
-        if isinstance(beams_config, dict):
-            for beam_name, beam_entry in beams_config.items():
-                if not isinstance(beam_entry, dict):
-                    continue
+        if "beam_1" in beams:
+            configs["state_modulation_config"] = (
+                beams["beam_1"]["envelope_config"]
+            )
 
-                beam_config = beam_entry.get("config", beam_entry)
+            configs["state_structure_config"] = (
+                beams["beam_1"]["landscape_config"]
+            )
 
-                if not isinstance(beam_config, dict):
-                    continue
-
-                for key, value in beam_config.items():
-                    if key.endswith("_config"):
-                        configs[key] = value
+        if "beam_2" in beams:
+            configs["lattice_modulation_config"] = (
+                beams["beam_2"]["envelope_config"]
+            )
 
     return configs
 
+
 def _load_stored_config(data_directory):
-    data_directory = Path(data_directory)
-    configs_directory = data_directory / "configs"
+    configs_directory = Path(data_directory) / "configs"
 
     configs = _load_config_dict(configs_directory)
     configs = _add_config_aliases(configs)
 
-    return SimpleNamespace(**configs)
+    return configs

@@ -12,7 +12,7 @@ class FeaturesConfig:
         **kwargs,
     ):
         self.nfeatures = len(landscape_config["f"])
-        self.f = {f"f{i}": landscape_config["f"][i] for i in range(self.nfeatures)}
+        self._set_feature(landscape_config["f"])
 
         self.encoding_size = landscape_config["size"]
         
@@ -22,3 +22,8 @@ class FeaturesConfig:
         
         super().__init__(*args, **kwargs)
         
+    def _set_feature(
+        self,
+        f,
+    ):
+        self.f = {f"f{i}": f[i] for i in range(self.nfeatures)}

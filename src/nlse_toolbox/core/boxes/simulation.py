@@ -1,7 +1,8 @@
 from .store_config.store import store_config
+from .detection.noise import Detection
 
 
-class AnalogousTime2DSimulationBox:
+class AnalogousTime2DSimulationBox(Detection):
     def __init__(
         self,
         beams: dict,
@@ -23,13 +24,35 @@ class AnalogousTime2DSimulationBox:
         
         self.mesh.init()
         self.model.init(self, *args, **kwargs)
-        self.init_beams()
+        self.init_beams(
+            encoding_noise = self.solver.encoding_noise,
+        )
         self.solver.init(self)
     
-    def init_beams(self,):
+    def init_beams(
+        self,
+        encoding_noise=0.,
+    ):
         for beam in self.beams.values():
-            beam.init(self)
-    
+            beam.init(
+                self,
+                encoding_noise = encoding_noise,
+            )
+            self.random_phase(
+                beam = beam,
+            )
+        
+    def random_phase(
+        self,
+        beam,
+    ):
+        if hasattr(beam, "random_phase"):
+            if beam.random_phase:
+                if ((not beam.fixed_phase_mask) or (not hasattr(beam, "random_phase_mask"))):
+                    print("Generating Speckle")
+                    beam.gen_random_phase_mask(self, beam.speckle_size)
+                beam.add_random_phase()
+
     def solve(self,):
         self.storage.store_step(
                 box = self,

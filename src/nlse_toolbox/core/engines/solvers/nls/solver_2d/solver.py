@@ -20,6 +20,16 @@ class SplitStepSolver(
         if ("backend" in solver_config.keys()):
             self.backend = solver_config["backend"]
         
+        if ("encoding_noise" in solver_config.keys()):
+            self.encoding_noise = solver_config["encoding_noise"]
+        else:
+            self.encoding_noise = 0.
+            
+        if ("detection_noise" in solver_config.keys()):
+            self.detection_noise = solver_config["detection_noise"]
+        else:
+            self.detection_noise = 0.
+        
         super().__init__(*args, **kwargs,)
     
     def init(self, box):

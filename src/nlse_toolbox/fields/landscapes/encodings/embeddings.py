@@ -3,9 +3,12 @@ import numpy as np
 from .config import FeaturesConfig
 from .macropixels.macropixels import continuous_macropixels
 from .macropixels.tile_macropixels import _tile_macropixels
+from .random_phase.continuous_random_phase import ContinuousRandomSpecklePhaseMask
 
-
-class ContinuousFeatureEmbeddings(FeaturesConfig):
+class ContinuousFeatureEmbeddings(
+    FeaturesConfig,
+    ContinuousRandomSpecklePhaseMask,
+):
     def landscape_function(self, mesh):
         # get individual macropixels
         macropixels = continuous_macropixels(

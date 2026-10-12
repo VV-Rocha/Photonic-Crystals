@@ -16,3 +16,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[dependency-groups]
+simulation-env = [
+    "imageio>=2.37.4",
+    "scipy>=1.18.1",
+    "sympy>=1.14.0",
+]

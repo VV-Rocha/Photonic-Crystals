@@ -22,6 +22,11 @@ class StorageField(FieldDirectories):
                     box,
                     index="last",
                 )
+            elif (index == 0):
+                self.store_field(
+                    box,
+                    index="0",
+                )
         elif (self.store.lower() == "stride"):
             self.store_field(
                 box,
@@ -39,7 +44,7 @@ class StorageField(FieldDirectories):
         Args:
             index (_type_, optional): step index to store. Defaults to None.
         """
-        file_dir = self.get_field_directory(index)
+        file_dir = self.get_field_directory(index, storage_mode=True)
         
         with h5py.File(file_dir, "w") as hf:
             for beam_key, beam_value in box.beams.items():

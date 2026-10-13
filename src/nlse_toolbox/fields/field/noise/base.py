@@ -13,8 +13,8 @@ def whitenoise_field(
     Returns:
         np.ndarray: Generated white noise array.
     """
-    new_field = np.random.normal(0,
-                       scale=A,
+    new_field = A*np.random.normal(0,
+                       scale=1,
                        size=shape,
                        )
     return new_field

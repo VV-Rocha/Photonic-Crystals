@@ -4,15 +4,18 @@ __all__ = [
     'ShiqiXiaUniformSSH',
     'SiteBySiteUniformSSH',
     'MoireLatticeGaussian',
+    'MoireLatticeUniform',
     'PhaseStepGaussian',
+    'BogoliubovGaussian',
     # oc
     'ContinuousFeatureGaussian',
 ]
 
 
 ### Quantum Fluids
-from .field_2d import MoireLatticeGaussian
+from .field_2d import MoireLatticeGaussian, MoireLatticeUniform
 from .field_2d import Gaussian
+from .field_2d import BogoliubovGaussian
 
 from .field_2d import ShiqiXiaUniformSSH, SiteBySiteUniformSSH
 

@@ -23,13 +23,12 @@ class StorageConfig:
         else:
             self.store = "last"
         
-        if hasattr(self, "stride"):
-            if self.store.lower() == "stride":
-                self.stride = storage_config["stride"]
-            else:
-                self.stride = None
-        else:
+        if "stride" in storage_config.keys():
+            self.stride = storage_config["stride"]
+        elif self.store == "last":
             self.stride = None
+        else:
+            self.stride = 1
         
         self.endswith_dash()
         
@@ -46,20 +45,6 @@ class StorageConfig:
             self.home += "/"
         
 class FolderMethods(StorageConfig):
-    def __init__(
-        self,
-        *args,
-        **kwargs,
-    ):
-        """ Initialize folder methods and ensure home folder exists."""
-        super().__init__(
-            *args,
-            **kwargs,
-        )
-        
-        self.home_folder()
-        self.config_folder()
-        
     def home_folder(self,):
         """ Ensure the home folder exists."""
         if not os.path.exists(self.home):
@@ -75,27 +60,19 @@ class FolderMethods(StorageConfig):
         if not os.path.exists(self.home + relative_directory):
             os.makedirs(self.home + relative_directory)
             
-    def get_directory(self, relative_directory=""):
+    def get_directory(
+        self,
+        relative_directory = "",
+        storage_mode = False,
+    ):
         """ Get the full directory path for a given relative directory, creating it if necessary."""
         if "." in relative_directory:
             return self.home + relative_directory
-        self.make_folder(relative_directory = relative_directory)
+        if storage_mode:
+            self.make_folder(relative_directory = relative_directory)
         return self.home + relative_directory
             
 class FieldDirectories(FolderMethods):
-    """ Class to handle field directories."""
-    def __init__(
-        self,
-        *args,
-        **kwargs,
-    ):
-        """ Initialize field directories and ensure field folder exists."""
-        super().__init__(
-            *args,
-            **kwargs,
-            )
-        self.make_folder(relative_directory = self.field_rel_directory)
-        
     @property
     def field_rel_directory(self,):
         return "Field/"
@@ -120,7 +97,11 @@ class FieldDirectories(FolderMethods):
             dir_ = "field_" + str(index) + ".h5"
         return dir_
     
-    def get_field_directory(self, index=None):
+    def get_field_directory(
+        self,
+        index=None,
+        storage_mode=False,
+    ):
         """ Get the full directory path for the field based on the storage mode and index."""
         self.automatic_stride()
-        return self.get_directory(self.field_rel_directory) + self.field_filename(index)
+        return self.get_directory(self.field_rel_directory, storage_mode=storage_mode) + self.field_filename(index)

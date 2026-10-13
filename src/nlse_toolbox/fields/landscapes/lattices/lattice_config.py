@@ -7,7 +7,7 @@ class MoireLatticeConfig:
         **kwargs,
     ):
         """Initialize lattice parameters from configuration dictionary.
-
+        
         Args:
             landscape_config (dict): Configuration dictionary containing lattice parameters. keys:
                 - "angle": Angle of the first lattice.
@@ -19,5 +19,10 @@ class MoireLatticeConfig:
         self.angle = (landscape_config["angle"], landscape_config["angle1"])
         self.a = (landscape_config["a"], landscape_config["a1"])
         self.p = (landscape_config["p"], landscape_config["p1"])
+        
+        if hasattr(self, "alpha"):
+            self.alpha = landscape_config["alpha"]
+        else:
+            self.alpha = self.a[1]/self.a[0]
         
         super().__init__(*args, **kwargs)

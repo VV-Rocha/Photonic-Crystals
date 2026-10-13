@@ -1,8 +1,13 @@
 __all__ = [
+    # solvers
     'SplitStepSolver',
+    # meshes
     'Mesh2D',
+    # medium
     'PhotorefractiveCrystal',
+    # models
     'PhotorefractiveModel',
+    'LatticePhotorefractiveModel',
     'WavevectorPhotorefractiveModel',
     # boxes
     'AnalysisBox',
@@ -10,6 +15,8 @@ __all__ = [
     # storage
     'StorageField',
     'LoadSimulation',
+    # analysis
+    'find_moire_lattice_vectors',
     # plotting
     'plot_2d',
     'plot_3d',
@@ -29,14 +36,18 @@ from .media.photorefractive.photorefractive import PhotorefractiveCrystal
 
 # expose models
 from .engines.solvers.nls.coefficients.models import PhotorefractiveModel
+from .engines.solvers.nls.coefficients.models import LatticePhotorefractiveModel
 from .engines.solvers.nls.coefficients.models import WavevectorPhotorefractiveModel
 
 # expose solvers
-from .engines.solvers.nls.solver_2d.solver import SplitStepSolver
+from .engines.solvers.nls.solver_2d.solver import MetadataSplitStepSolver as SplitStepSolver
 
 # storage
 from .storage.store_methods import StorageField
 
+# analysis
+from .analysis.bandstructures.moire_lattice_vectors.find_lattice_vectors import find_moire_lattice_vectors
+from .analysis.bandstructures.eigendecomposition.decomposition import photorefractive_bandstructure
 
 # plotting
 from .plotting import plot_2d

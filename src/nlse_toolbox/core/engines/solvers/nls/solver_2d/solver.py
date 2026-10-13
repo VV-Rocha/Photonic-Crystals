@@ -1,39 +1,46 @@
-from .....arrayfire_utils.device import set_device
+import numpy as np
 
 from ..iterators.solver import AfTimeSpaceAnalogIterator
-from .step_methods import StepMethods
-from .solver_grid import SolverMeshGrid
+from .step_methods.step_methods import StepMethods
+from .solver_init import SolverInit
 
 
 class SplitStepSolver(
+    SolverInit,
     StepMethods,
     AfTimeSpaceAnalogIterator,
 ):
-    def __init__(
+    pass
+
+        
+class MetadataSplitStepSolver(
+    SplitStepSolver,
+):
+    def init(
         self,
-        solver_config,
-        *args,
-        **kwargs,
+        box,
     ):
-        if ("device" in solver_config.keys()):
-            self.device = solver_config["device"]
-        if ("backend" in solver_config.keys()):
-            self.backend = solver_config["backend"]
-        
-        if ("encoding_noise" in solver_config.keys()):
-            self.encoding_noise = solver_config["encoding_noise"]
-        else:
-            self.encoding_noise = 0.
-            
-        if ("detection_noise" in solver_config.keys()):
-            self.detection_noise = solver_config["detection_noise"]
-        else:
-            self.detection_noise = 0.
-        
-        super().__init__(*args, **kwargs,)
+        super().init(box=box)
+        if hasattr(self, "metadata"):
+            self.init_metadata_storage()
     
-    def init(self, box):
-        set_device(self.device)
-        
-        self.mesh = SolverMeshGrid(box)
-        self.mesh.init()
+    def init_metadata_storage(
+        self,
+    ):
+        self.metadata_history = {}
+        for beam in self.metadata.keys():
+            self.metadata_history[beam] = {}
+            for metadata in self.metadata[beam].keys():
+                self.metadata_history[beam][metadata] = np.empty(self.Nsteps+1)
+                
+    def compute_metadata(
+        self,
+        i,
+        box,
+    ):
+        for beam in self.metadata.keys():
+            for metadata in self.metadata[beam].keys():
+                self.metadata_history[beam][metadata][i] = self.metadata[beam][metadata](
+                    beam = beam,
+                    box = box,
+                )

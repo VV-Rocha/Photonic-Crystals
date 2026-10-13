@@ -1,7 +1,7 @@
 import arrayfire as af
 
 from .step_functions import _linear_step, _nonlinear_step, _absorption_step
-from .utils import exp_coefficient
+from ..utils import exp_coefficient
     
 class StepMethods:
     def step_solver(self, box):

@@ -23,7 +23,7 @@ def _linear_step(
     field[:,:] = af.signal.fft2(field)
 
     exp = af.exp((1j * step*dz * (kxx**2 + kyy**2) * kinetic))  # minus sign is absorbed in the kinetic coefficient
-        
+    
     field[:,:] = exp * field
     field[:,:] = af.signal.ifft2(field)
 

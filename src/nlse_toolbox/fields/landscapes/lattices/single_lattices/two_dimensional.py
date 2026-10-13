@@ -4,22 +4,13 @@ from typing import Tuple
 
 
 def lattice_reciprocal_outer(vectors: np.ndarray) -> np.ndarray:
-    """Get the reciprocal lattices for the 2D lattice vectors.
+    a1, a2 = np.asarray(vectors, dtype=float)
+    denominator = a1[0]*a2[1] - a1[1]*a2[0]
 
-    Args:
-        vectors (np.ndarray): Lattice vectors.
-
-    Returns:
-        np.ndarray: Reciprocal lattice vectors.
-    """
-    denominator = vectors[0][0]*vectors[1][1] - vectors[0][1]*vectors[1][0]
-    # compute reciprocal lattice vectors
-    b1 = [2*np.pi*vectors[1][1]/ denominator, -2*np.pi*vectors[1][0]/ denominator]
-    b2 = [2*np.pi*vectors[0][1]/ denominator, -2*np.pi*vectors[0][0]/ denominator]
-    
-    vectors[0, 0], vectors[0, 1] = b1[0], b1[1]
-    vectors[1, 0], vectors[1, 1] = b2[0], b2[1]
-    return vectors
+    return (2*np.pi / denominator) * np.array([
+        [ a2[1], -a2[0]],
+        [-a1[1],  a1[0]],
+    ])
 
 def general_planewaves(
     xx: np.ndarray,

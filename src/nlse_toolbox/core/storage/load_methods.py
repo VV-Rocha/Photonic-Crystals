@@ -5,37 +5,54 @@ from .directories import FieldDirectories
 
 
 def init_array(box):
-    return np.empty(
-        (
-            box.mesh.Nz+1,
-            box.mesh.Nx,
-            box.mesh.Ny,
-        ),
-        dtype = np.complex128,    
-    )
-    
+    if box.storage.store.lower() == "last":
+        return np.empty(
+            (
+                2,
+                box.mesh.Nx,
+                box.mesh.Ny,
+            ),
+            dtype = np.complex128,    
+        )
+    elif box.storage.store.lower() == "stride":
+        return np.empty(
+            (
+                int(1 + box.mesh.Nz // box.storage.stride),
+                box.mesh.Nx,
+                box.mesh.Ny,
+            ),
+            dtype = np.complex128,    
+        )
+
 
 def _load_file(
+    i,
     idx,
     folder_dir,
     box,
-    beams,
 ):
-    directory = folder_dir + f"field_{idx}.h5"
+    directory = folder_dir + f"field_{"last" if (i==-1) else i}.h5"
     with h5py.File(directory, "r") as f:
         for beam in f.keys():
             if (idx==0):
-                beams[beam].field = init_array(box)
-            beams[beam].field[idx] = f[beam][:]
-    return beams
+                box.beams[beam].field = init_array(box)
+            box.beams[beam].field[idx] = f[beam][:]
+    return box.beams
 
 
 class LoadSimulation(FieldDirectories):
-    def _load_simulation(self, box):        
-        for i in range(box.mesh.Nz+1):
+    def _load_simulation(self, box):
+        if (box.storage.store.lower() == "last"):
+            search_range = [0, -1]
+        elif (box.storage.store.lower() == "stride"):
+            search_range = range(0, box.mesh.Nz+1, box.storage.stride)
+            idx = 0
+        for i in search_range:
             box.beams = _load_file(
                 i,
+                idx,
                 box.storage.get_directory("Field/"),
                 box,
-                box.beams,
             )
+            if (box.storage.store.lower() == "stride"):
+                idx += 1

@@ -4,7 +4,7 @@ from .potential import SaturatedPotential
 from .nlse_coefs import NLSECoefs
 
 from numpy import pi, isfinite
-        
+
 
 class PhotorefractiveModel(SaturatedPotential):
     """Coefficients of the Nonlinear Schrodinger Equation emerging in the paraxial propagation of light in photorefractive crystals."""

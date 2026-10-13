@@ -1,5 +1,5 @@
 from .....arrayfire_utils.np_af_interface import from_arrayfire_to_numpy
-from .....arrayfire_utils.np_af_interface import  from_numpy_to_arrayfire
+from .....arrayfire_utils.np_af_interface import from_numpy_to_arrayfire
 
 
 def fields_af_to_np(box):

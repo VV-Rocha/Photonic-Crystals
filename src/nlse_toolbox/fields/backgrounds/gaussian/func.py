@@ -26,9 +26,8 @@ def gaussian_25_1d(
     canvas = np.zeros(shape, dtype=np.complex128)
     canvas[:] = np.exp(-.5*(2*((x - center)/w)**2)**power)
 
-    canvas /= np.max(np.abs(canvas)**2)
+    canvas *= np.sqrt(I / np.max(np.abs(canvas)**2))
     
-    canvas *= np.sqrt(I)
     return canvas
 
 def gaussian_25_2d(
@@ -57,8 +56,5 @@ def gaussian_25_2d(
     canvas = np.zeros(shape, dtype=np.complex128)
     canvas[:, :] = np.exp(-.5*(2*(((x - center[0])/width[0])**2 + ((y - center[1])/width[1])**2))**power)
     
-    canvas /= np.max(np.abs(canvas)**2)
-    
-    canvas *= np.sqrt(I)
-    
+    canvas *= np.sqrt(I / np.max(np.abs(canvas)**2))
     return canvas
